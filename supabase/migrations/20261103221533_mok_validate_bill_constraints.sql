@@ -1,0 +1,1 @@
+ALTER TABLE public.bills VALIDATE CONSTRAINT bills_amount_components_nonnegative;
