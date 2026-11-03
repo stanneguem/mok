@@ -63,6 +63,10 @@ export default function Dashboard({onNavigate}) {
             <button className="dashboard-shortcut" onClick={()=>onNavigate('invoices')}><span className="dashboard-shortcut-icon">▧</span><span><strong>Facturation</strong><small>Factures et résidu</small></span></button>
             <button className="dashboard-shortcut" onClick={()=>onNavigate('pay')}><span className="dashboard-shortcut-icon">↗</span><span><strong>Paiements</strong><small>Suivi des règlements</small></span></button>
             <button className="dashboard-shortcut" onClick={()=>onNavigate('tenants')}><span className="dashboard-shortcut-icon">♙</span><span><strong>Locataires</strong><small>Gestion des occupants</small></span></button>
+            <button className="dashboard-shortcut" onClick={()=>onNavigate('meters')}><span className="dashboard-shortcut-icon">◉</span><span><strong>Compteurs</strong><small>Parc et affectations</small></span></button>
+            <button className="dashboard-shortcut" onClick={()=>onNavigate('consumption')}><span className="dashboard-shortcut-icon">ϟ</span><span><strong>Consommation générale</strong><small>Suivi mensuel fournisseur</small></span></button>
+            <button className="dashboard-shortcut" onClick={()=>onNavigate('fund')}><span className="dashboard-shortcut-icon">◈</span><span><strong>Fonds d’urgence</strong><small>Solde et historique</small></span></button>
+            <button className="dashboard-shortcut" onClick={()=>onNavigate('settings')}><span className="dashboard-shortcut-icon">⚙</span><span><strong>Paramètres</strong><small>Préférences de MOK</small></span></button>
           </div>
         </section>
       </div>
