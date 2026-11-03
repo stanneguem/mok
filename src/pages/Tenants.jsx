@@ -53,12 +53,12 @@ export default function Tenants() {
     const name=form.name.trim()
     if(!name){setNotice({text:'Le nom du locataire est obligatoire.',type:'error'});return}
     setBusy(true)
-    const {data,error}=await supabase.from('tenants').insert({name,phone:form.phone.trim()||null,email:form.email.trim()||null,arrival_date:form.arrival_date||null,gender:form.gender||null,address:form.address.trim()||null,notes:form.notes.trim()||null,photo_url:form.photo_url||null}).select('id,name,phone,email,arrival_date,gender,address,notes,active').single()
+    const {data,error}=await supabase.from('tenants').insert({name,phone:form.phone.trim()||null,email:form.email.trim()||null,arrival_date:form.arrival_date||null,gender:form.gender||null,address:form.address.trim()||null,notes:form.notes.trim()||null,photo_url:form.photo_url||null}).select('id,name,phone,email,arrival_date,gender,address,notes,photo_url,active').single()
     setBusy(false)
     if(error){setNotice({text:error.message,type:'error'});return}
     if(form.house_id){const {error:assignmentError}=await supabase.from('house_tenant_assignments').insert({house_id:form.house_id,tenant_id:data.id});if(assignmentError){setNotice({text:assignmentError.code==='23505'?'Cette maison est déjà occupée ou le locataire possède déjà un logement.':assignmentError.message,type:'error'});return}}
     setList(current=>[...current,data].sort((a,b)=>a.name.localeCompare(b.name)))
-    setForm({name:'',phone:'',email:'',arrival_date:'',gender:'',address:'',notes:'',house_id:''});setShowAdd(false);setNotice({text:'Locataire ajouté avec succès.',type:'success'});openTenant(data)
+    setForm({name:'',phone:'',email:'',arrival_date:'',gender:'',address:'',notes:'',house_id:'',photo_url:''});setShowAdd(false);setNotice({text:'Locataire ajouté avec succès.',type:'success'});openTenant(data)
   }
   const save=async()=>{
     if(!editForm.name?.trim()){setNotice({text:'Le nom du locataire est obligatoire.',type:'error'});return}
