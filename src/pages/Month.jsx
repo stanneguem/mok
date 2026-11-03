@@ -220,15 +220,6 @@ export default function Month({view='readings'}) {
         </>}
       </section>
 
-      <section className="panel step-panel">
-        <div className="panel-heading"><div><div className="step-title"><span className="step-number">3</span><h2>Facture générale du fournisseur</h2></div><p className="step-description">Compare la facture du fournisseur à la somme des consommations individuelles pour calculer le résidu.</p></div></div>
-        <div className="period-toolbar main-bill-toolbar">
-          <div className="field"><label htmlFor="main-index">Index du compteur principal</label><input id="main-index" type="number" min="0" step="1" placeholder="Index général" value={main.main_index} onChange={e=>setMain({...main,main_index:e.target.value})}/></div>
-          <div className="field"><label htmlFor="main-amount">Montant de la facture (FCFA)</label><input id="main-amount" type="number" min="0" step="1" placeholder="Montant total" value={main.main_amount} onChange={e=>setMain({...main,main_amount:e.target.value})}/></div>
-          <div className="toolbar-action"><button className="primary-button" disabled={busy||!bills.length} onClick={saveMain}>{busy?'Enregistrement…':'Calculer et enregistrer le résidu'}</button></div>
-        </div>
-        {period.main_amount!==null&&period.main_amount!==undefined&&<div className="metric-inline" style={{marginTop:15}}><span className="metric-pill">Facture générale : <strong>{money(period.main_amount)}</strong></span><span className="metric-pill">Résidu calculé : <strong>{money(period.residual||0)}</strong></span><span className="metric-pill">{Number(period.residual||0)<0?'Affecté au fonds d’urgence':'À répartir le mois suivant'}</span></div>}
-      </section>
       </>
       )}
     </>}
