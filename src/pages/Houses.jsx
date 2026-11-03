@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useState} from 'react'
 import {supabase} from '../supabase'
+import RecordPhotoField from '../components/RecordPhotoField'
 const empty={name:'',address:'',city:'',neighborhood:'',building:'',floor:'',door_number:'',description:''}
 const dateLabel=v=>v?new Date(v+'T00:00:00').toLocaleDateString('fr-FR'):'—'
 export default function Houses(){
