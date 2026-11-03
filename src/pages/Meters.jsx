@@ -1,34 +1,83 @@
-import {useEffect,useState} from 'react'
+import {useEffect,useMemo,useState} from 'react'
 import {supabase} from '../supabase'
 
-export default function Meters() {
-  const [tenants,setTenants]=useState([])
-  const [values,setValues]=useState({})
+const empty={meter_number:'',meter_type:'electricity',brand:'',model:'',initial_index:'',installation_date:'',notes:''}
+export default function Meters(){
+  const [meters,setMeters]=useState([])
+  const [houses,setHouses]=useState([])
+  const [assignments,setAssignments]=useState([])
+  const [form,setForm]=useState(empty)
+  const [editing,setEditing]=useState(null)
+  const [houseChoice,setHouseChoice]=useState({})
+  const [query,setQuery]=useState('')
   const [loading,setLoading]=useState(true)
   const [busy,setBusy]=useState('')
-  const [message,setMessage]=useState({text:'',type:'info'})
+  const [notice,setNotice]=useState({text:'',type:'info'})
   const load=async()=>{
     setLoading(true)
-    const {data,error}=await supabase.from('tenants').select('id,name,phone,meter_no,active').order('name')
-    if(error)setMessage({text:error.message,type:'error'})
-    else {setTenants(data||[]);setValues(Object.fromEntries((data||[]).map(t=>[t.id,t.meter_no||''])))}
+    const [m,h,a]=await Promise.all([
+      supabase.from('meters').select('*').order('meter_number'),
+      supabase.from('houses').select('id,name,address,city').eq('active',true).order('name'),
+      supabase.from('meter_house_assignments').select('id,meter_id,house_id,assigned_at,houses(name,address)').is('released_at',null)
+    ])
+    const error=m.error||h.error||a.error
+    if(error)setNotice({text:error.message,type:'error'})
+    else {setMeters(m.data||[]);setHouses(h.data||[]);setAssignments(a.data||[])}
     setLoading(false)
   }
   useEffect(()=>{load()},[])
-  const save=async tenant=>{
-    setBusy(tenant.id);setMessage({text:'',type:'info'})
-    const {error}=await supabase.from('tenants').update({meter_no:(values[tenant.id]||'').trim()||null}).eq('id',tenant.id)
-    if(error)setMessage({text:error.message,type:'error'})
-    else {setMessage({text:'Compteur enregistré pour '+tenant.name+'.',type:'success'});await load()}
+  const currentFor=m=>assignments.find(a=>a.meter_id===m.id)
+  const assignedHouseIds=new Set(assignments.map(a=>a.house_id))
+  const availableHouses=houses.filter(h=>!assignedHouseIds.has(h.id))
+  const filtered=useMemo(()=>{const q=query.trim().toLocaleLowerCase('fr');return meters.filter(m=>[m.meter_number,m.brand,m.model,m.meter_type].some(v=>(v||'').toLocaleLowerCase('fr').includes(q)))},[meters,query])
+  const save=async()=>{
+    if(!form.meter_number.trim()){setNotice({text:'Le numéro de compteur est obligatoire.',type:'error'});return}
+    setBusy('save')
+    const payload={...form,initial_index:form.initial_index===''?null:Number(form.initial_index),installation_date:form.installation_date||null}
+    const result=editing?await supabase.from('meters').update(payload).eq('id',editing):await supabase.from('meters').insert(payload)
     setBusy('')
+    if(result.error){setNotice({text:result.error.message,type:'error'});return}
+    setForm(empty);setEditing(null);setNotice({text:editing?'Compteur mis à jour.':'Compteur ajouté à l’inventaire.',type:'success'});await load()
   }
-  const assigned=tenants.filter(t=>(values[t.id]||'').trim()).length
-  return <section className="workspace-page">
-    <header className="page-heading"><div><span className="eyebrow">PARC MATÉRIEL</span><h1>Gestion des compteurs</h1><p>Associe chaque compteur électrique à son locataire et maintiens ses références à jour.</p></div></header>
-    <div className="summary-grid"><article className="summary-card summary-primary"><span className="summary-label">Compteurs renseignés</span><strong>{assigned} / {tenants.length}</strong><span className="summary-foot">Locataires avec numéro de compteur</span></article><article className="summary-card"><span className="summary-label">À compléter</span><strong>{tenants.length-assigned}</strong><span className="summary-foot">Compteurs sans référence</span></article></div>
-    {message.text&&<div className={'notice '+(message.type==='error'?'notice-error':'notice-success')} role={message.type==='error'?'alert':'status'}>{message.text}</div>}
-    <section className="panel"><div className="panel-heading"><div><span className="eyebrow">AFFECTATIONS</span><h2>Compteurs des locataires</h2><p>Le numéro est enregistré dans la fiche du locataire.</p></div></div>
-      {loading?<div className="loading-inline"><span className="loading-spinner"/>Chargement des compteurs…</div>:tenants.length===0?<div className="empty-state"><h3>Aucun locataire</h3><p>Ajoute d'abord des locataires pour leur associer un compteur.</p></div>:<div className="table-scroll"><table className="data-table"><thead><tr><th>Locataire</th><th>Téléphone</th><th>Numéro du compteur</th><th>État</th><th>Action</th></tr></thead><tbody>{tenants.map(t=><tr key={t.id}><td><strong>{t.name}</strong></td><td>{t.phone||'—'}</td><td><input aria-label={'Numéro du compteur de '+t.name} value={values[t.id]??''} placeholder="Ex. MTR-001" onChange={e=>setValues(v=>({...v,[t.id]:e.target.value}))}/></td><td>{(values[t.id]||'').trim()?'Renseigné':'À compléter'}</td><td><button className="primary-button" disabled={busy===t.id} onClick={()=>save(t)}>{busy===t.id?'Enregistrement…':'Enregistrer'}</button></td></tr>)}</tbody></table></div>}
+  const assign=async meter=>{
+    const houseId=houseChoice[meter.id]
+    if(!houseId)return
+    setBusy(meter.id);setNotice({text:'',type:'info'})
+    const {error}=await supabase.from('meter_house_assignments').insert({meter_id:meter.id,house_id:houseId})
+    setBusy('')
+    if(error)setNotice({text:error.code==='23505'?'Ce compteur ou cette maison possède déjà une affectation active.':error.message,type:'error'})
+    else {setNotice({text:'Compteur affecté à la maison.',type:'success'});setHouseChoice(v=>({...v,[meter.id]:''}));await load()}
+  }
+  const release=async assignment=>{
+    setBusy(assignment.id)
+    const {error}=await supabase.from('meter_house_assignments').update({released_at:new Date().toISOString().slice(0,10)}).eq('id',assignment.id)
+    setBusy('')
+    if(error)setNotice({text:error.message,type:'error'})
+    else {setNotice({text:'Compteur libéré. Son historique est conservé.',type:'success'});await load()}
+  }
+  const startEdit=m=>{setEditing(m.id);setForm(Object.fromEntries(Object.keys(empty).map(k=>[k,m[k]??''])))}
+  return <section className="workspace-page inventory-module">
+    <header className="page-heading"><div><span className="eyebrow">PARC MATÉRIEL</span><h1>Compteurs</h1><p>Gère l’inventaire et affecte chaque compteur à une seule maison à la fois.</p></div></header>
+    {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':'notice-success')} role={notice.type==='error'?'alert':'status'}>{notice.text}</div>}
+    <section className="panel inventory-form"><div className="panel-heading"><div><span className="eyebrow">{editing?'MODIFICATION':'NOUVEL ÉQUIPEMENT'}</span><h2>{editing?'Modifier le compteur':'Ajouter un compteur'}</h2></div></div>
+      <div className="inventory-fields">
+        <div className="field"><label>Numéro du compteur *</label><input value={form.meter_number} onChange={e=>setForm(v=>({...v,meter_number:e.target.value}))} placeholder="Ex. MTR-001"/></div>
+        <div className="field"><label>Type</label><select value={form.meter_type} onChange={e=>setForm(v=>({...v,meter_type:e.target.value}))}><option value="electricity">Électricité</option><option value="water">Eau</option><option value="gas">Gaz</option><option value="other">Autre</option></select></div>
+        <div className="field"><label>Marque</label><input value={form.brand} onChange={e=>setForm(v=>({...v,brand:e.target.value}))} placeholder="Marque"/></div>
+        <div className="field"><label>Modèle</label><input value={form.model} onChange={e=>setForm(v=>({...v,model:e.target.value}))} placeholder="Modèle"/></div>
+        <div className="field"><label>Index initial</label><input type="number" min="0" step="0.001" value={form.initial_index} onChange={e=>setForm(v=>({...v,initial_index:e.target.value}))} placeholder="0"/></div>
+        <div className="field"><label>Date d’installation</label><input type="date" value={form.installation_date} onChange={e=>setForm(v=>({...v,installation_date:e.target.value}))}/></div>
+        <div className="field inventory-field-wide"><label>Notes</label><input value={form.notes} onChange={e=>setForm(v=>({...v,notes:e.target.value}))} placeholder="Informations complémentaires"/></div>
+      </div>
+      <div className="inventory-actions"><button className="secondary-button" type="button" onClick={()=>{setEditing(null);setForm(empty)}}>Réinitialiser</button><button className="primary-button" type="button" disabled={busy==='save'} onClick={save}>{busy==='save'?'Enregistrement…':editing?'Enregistrer':'Ajouter le compteur'}</button></div>
     </section>
+    <div className="tenant-list-toolbar"><div className="tenant-search"><span>⌕</span><input placeholder="Rechercher un compteur…" value={query} onChange={e=>setQuery(e.target.value)}/></div><span className="tenant-list-count">{meters.length} compteur{meters.length>1?'s':''}</span></div>
+    {loading?<div className="panel loading-inline"><span className="loading-spinner"/>Chargement des compteurs…</div>:<div className="inventory-grid">{filtered.map(m=>{const a=currentFor(m);return <article className="panel inventory-card" key={m.id}>
+      <div className="inventory-card-top"><span className="inventory-icon">◉</span><span className={'tenant-directory-status '+(a?'active':'inactive')}>{a?'Installé':'Disponible'}</span></div>
+      <h2>{m.meter_number}</h2><p>{[m.brand,m.model,m.meter_type==='electricity'?'Électricité':m.meter_type==='water'?'Eau':m.meter_type==='gas'?'Gaz':'Autre'].filter(Boolean).join(' · ')}</p>
+      <div className="inventory-meta"><span>Index initial : {m.initial_index??'—'}</span><span>Installation : {m.installation_date||'—'}</span></div>
+      <div className="inventory-assignment">{a?<><div><small>MAISON ACTUELLE</small><strong>{a.houses?.name||'Maison'}</strong></div><button className="secondary-button" disabled={busy===a.id} onClick={()=>release(a)}>{busy===a.id?'…':'Libérer'}</button></>:<><select value={houseChoice[m.id]||''} onChange={e=>setHouseChoice(v=>({...v,[m.id]:e.target.value}))}><option value="">Choisir une maison disponible</option>{availableHouses.map(h=><option key={h.id} value={h.id}>{h.name}{h.address?' · '+h.address:''}</option>)}</select><button className="primary-button" disabled={!houseChoice[m.id]||busy===m.id} onClick={()=>assign(m)}>{busy===m.id?'…':'Affecter'}</button></>}</div>
+      <button className="inventory-edit-link" onClick={()=>startEdit(m)}>Modifier les informations →</button>
+    </article>})}{filtered.length===0&&<div className="panel empty-state"><h3>Aucun compteur trouvé</h3><p>Ajoute un compteur ou modifie ta recherche.</p></div>}</div>}
   </section>
 }
