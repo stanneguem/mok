@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useState} from 'react'
 import {supabase,fcfa} from '../supabase'
+import RecordPhotoField from '../components/RecordPhotoField'
 
 const initials=name=>(name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()
 const dateLabel=value=>value?new Date(value+'T00:00:00').toLocaleDateString('fr-FR'):'—'
@@ -11,7 +12,7 @@ export default function Tenants() {
   const [query,setQuery]=useState('')
   const [selected,setSelected]=useState(null)
   const [details,setDetails]=useState({readings:[],bills:[],payments:[],periods:[]})
-  const [form,setForm]=useState({name:'',phone:'',email:'',arrival_date:'',gender:'',address:'',notes:'',house_id:''})
+  const [form,setForm]=useState({name:'',phone:'',email:'',arrival_date:'',gender:'',address:'',notes:'',house_id:'',photo_url:''})
   const [editing,setEditing]=useState(false)
   const [editForm,setEditForm]=useState({name:'',phone:'',email:'',arrival_date:'',gender:'',address:'',notes:'',house_id:''})
   const [showAdd,setShowAdd]=useState(false)
@@ -22,7 +23,7 @@ export default function Tenants() {
   const [notice,setNotice]=useState({text:'',type:'info'})
 
   const load=async()=>{
-    const {data,error}=await supabase.from('tenants').select('id,name,phone,email,arrival_date,gender,address,notes,active').order('name')
+    const {data,error}=await supabase.from('tenants').select('id,name,phone,email,arrival_date,gender,address,notes,photo_url,active').order('name')
     if(error){setNotice({text:error.message,type:'error'});return}
     setList(data||[])
     const [h,a]=await Promise.all([supabase.from('houses').select('id,name,address,city').eq('active',true).order('name'),supabase.from('house_tenant_assignments').select('id,house_id,tenant_id,assigned_at').is('released_at',null)])
@@ -52,7 +53,7 @@ export default function Tenants() {
     const name=form.name.trim()
     if(!name){setNotice({text:'Le nom du locataire est obligatoire.',type:'error'});return}
     setBusy(true)
-    const {data,error}=await supabase.from('tenants').insert({name,phone:form.phone.trim()||null,email:form.email.trim()||null,arrival_date:form.arrival_date||null,gender:form.gender||null,address:form.address.trim()||null,notes:form.notes.trim()||null}).select('id,name,phone,email,arrival_date,gender,address,notes,active').single()
+    const {data,error}=await supabase.from('tenants').insert({name,phone:form.phone.trim()||null,email:form.email.trim()||null,arrival_date:form.arrival_date||null,gender:form.gender||null,address:form.address.trim()||null,notes:form.notes.trim()||null,photo_url:form.photo_url||null}).select('id,name,phone,email,arrival_date,gender,address,notes,active').single()
     setBusy(false)
     if(error){setNotice({text:error.message,type:'error'});return}
     if(form.house_id){const {error:assignmentError}=await supabase.from('house_tenant_assignments').insert({house_id:form.house_id,tenant_id:data.id});if(assignmentError){setNotice({text:assignmentError.code==='23505'?'Cette maison est déjà occupée ou le locataire possède déjà un logement.':assignmentError.message,type:'error'});return}}
@@ -62,7 +63,7 @@ export default function Tenants() {
   const save=async()=>{
     if(!editForm.name?.trim()){setNotice({text:'Le nom du locataire est obligatoire.',type:'error'});return}
     setBusy(true)
-    const update={name:editForm.name.trim(),phone:editForm.phone?.trim()||null,email:editForm.email?.trim()||null,arrival_date:editForm.arrival_date||null,gender:editForm.gender||null,address:editForm.address?.trim()||null,notes:editForm.notes?.trim()||null}
+    const update={name:editForm.name.trim(),phone:editForm.phone?.trim()||null,email:editForm.email?.trim()||null,arrival_date:editForm.arrival_date||null,gender:editForm.gender||null,address:editForm.address?.trim()||null,notes:editForm.notes?.trim()||null,photo_url:editForm.photo_url||null}
     const {error}=await supabase.from('tenants').update(update).eq('id',selected.id)
     setBusy(false)
     if(error){setNotice({text:error.message,type:'error'});return}
@@ -93,6 +94,7 @@ export default function Tenants() {
       {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':notice.type==='success'?'notice-success':'notice-info')} role={notice.type==='error'?'alert':'status'}>{notice.text}</div>}
       <section className="tenant-edit-hero"><span className="tenant-profile-avatar">＋</span><div><span className="eyebrow">NOUVEAU DOSSIER</span><h1>Ajouter un locataire</h1><p>Renseigne les informations du nouvel occupant pour créer sa fiche.</p></div></section>
       <section className="panel tenant-edit-form-panel"><div className="panel-heading"><div><span className="eyebrow">INFORMATIONS DU LOCATAIRE</span><h2>Coordonnées et logement</h2><p>Le nom complet est obligatoire. Tu pourras compléter ou modifier ces informations plus tard.</p></div></div>
+        <RecordPhotoField value={form.photo_url} label="Photo du locataire" onChange={photo_url=>setForm(v=>({...v,photo_url}))}/>
         <div className="tenant-edit-fields">
           <div className="field"><label htmlFor="tenant-name">Nom complet *</label><input id="tenant-name" autoFocus value={form.name} onChange={e=>setForm(v=>({...v,name:e.target.value}))} placeholder="Nom et prénom" autoComplete="name"/></div>
           <div className="field"><label htmlFor="tenant-phone">Téléphone</label><input id="tenant-phone" type="tel" value={form.phone} onChange={e=>setForm(v=>({...v,phone:e.target.value}))} placeholder="+237…" autoComplete="tel"/></div>
@@ -110,6 +112,7 @@ export default function Tenants() {
       {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':notice.type==='success'?'notice-success':'notice-info')} role={notice.type==='error'?'alert':'status'}>{notice.text}</div>}
       <section className="tenant-edit-hero"><span className="tenant-profile-avatar">{initials(selected.name)}</span><div><span className="eyebrow">MODIFICATION DU DOSSIER</span><h1>Modifier la fiche</h1><p>Mets à jour les coordonnées et les informations du locataire.</p></div></section>
       <section className="panel tenant-edit-form-panel"><div className="panel-heading"><div><span className="eyebrow">INFORMATIONS PERSONNELLES</span><h2>{selected.name}</h2><p>Les champs marqués d’un * sont obligatoires.</p></div></div>
+        <RecordPhotoField value={editForm.photo_url} label="Photo du locataire" onChange={photo_url=>setEditForm(v=>({...v,photo_url}))}/>
         <div className="tenant-edit-fields">
           <div className="field"><label htmlFor="edit-tenant-name">Nom complet *</label><input id="edit-tenant-name" autoFocus value={editForm.name} onChange={e=>setEditForm(v=>({...v,name:e.target.value}))} placeholder="Nom et prénom"/></div>
           <div className="field"><label htmlFor="edit-tenant-phone">Téléphone</label><input id="edit-tenant-phone" type="tel" value={editForm.phone} onChange={e=>setEditForm(v=>({...v,phone:e.target.value}))} placeholder="+237…"/></div>
@@ -127,14 +130,14 @@ export default function Tenants() {
       {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':notice.type==='success'?'notice-success':'notice-info')} role={notice.type==='error'?'alert':'status'}>{notice.text}</div>}
       <div className="tenant-list-toolbar"><div className="tenant-search"><span aria-hidden="true">⌕</span><input aria-label="Rechercher un locataire" placeholder="Rechercher par nom, téléphone ou adresse…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button type="button" onClick={()=>setQuery('')} aria-label="Effacer la recherche">×</button>}</div><span className="tenant-list-count">{filtered.length} / {list.length} locataire{list.length>1?'s':''}</span></div>
       <section className="tenant-directory">
-        {loading?<div className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement des locataires…</div></div>:filtered.length===0?<div className="panel empty-state"><span className="empty-icon">♙</span><h3>{query?'Aucun résultat':'Aucun locataire enregistré'}</h3><p>{query?'Essaie avec un autre nom, numéro de téléphone ou compteur.':'Ajoute ton premier locataire pour commencer.'}</p></div>:filtered.map(t=><button type="button" className="tenant-directory-card" key={t.id} onClick={()=>openTenant(t)}><span className="tenant-directory-avatar">{initials(t.name)}</span><span className="tenant-directory-main"><strong>{t.name}</strong><small>{t.phone||'Téléphone non renseigné'} <i>·</i> {houses.find(h=>h.id===houseAssignments.find(a=>a.tenant_id===t.id)?.house_id)?.name||'Maison non affectée'}</small></span><span className={'tenant-directory-status '+(t.active?'active':'inactive')}>{t.active?'Actif':'Inactif'}</span><span className="tenant-directory-chevron">›</span></button>)}
+        {loading?<div className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement des locataires…</div></div>:filtered.length===0?<div className="panel empty-state"><span className="empty-icon">♙</span><h3>{query?'Aucun résultat':'Aucun locataire enregistré'}</h3><p>{query?'Essaie avec un autre nom, numéro de téléphone ou compteur.':'Ajoute ton premier locataire pour commencer.'}</p></div>:filtered.map(t=><button type="button" className="tenant-directory-card" key={t.id} onClick={()=>openTenant(t)}>{t.photo_url?<img className="tenant-directory-avatar record-directory-photo" src={t.photo_url} alt=""/>:<span className="tenant-directory-avatar">{initials(t.name)}</span>}<span className="tenant-directory-main"><strong>{t.name}</strong><small>{t.phone||'Téléphone non renseigné'} <i>·</i> {houses.find(h=>h.id===houseAssignments.find(a=>a.tenant_id===t.id)?.house_id)?.name||'Maison non affectée'}</small></span><span className={'tenant-directory-status '+(t.active?'active':'inactive')}>{t.active?'Actif':'Inactif'}</span><span className="tenant-directory-chevron">›</span></button>)}
       </section>
     </>:<>
       <header className="tenant-detail-toolbar"><button className="tenant-back-button" onClick={()=>{setSelected(null);setNotice({text:'',type:'info'});load()}}>← <span>Liste des locataires</span></button><span className="tenant-detail-breadcrumb">Fiche locataire</span></header>
       {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':notice.type==='success'?'notice-success':'notice-info')} role={notice.type==='error'?'alert':'status'}>{notice.text}</div>}
       <section className="tenant-profile-card">
-        <div className="tenant-profile-identity"><span className="tenant-profile-avatar">{initials(selected.name)}</span><div><span className="eyebrow">FICHE LOCATAIRE</span><h1>{selected.name}</h1><p>{selected.phone||'Téléphone non renseigné'}</p></div></div>
-        <div className="tenant-profile-actions"><span className={'tenant-directory-status '+(selected.active?'active':'inactive')}>{selected.active?'Actif':'Inactif'}</span><button className="secondary-button" onClick={()=>{setEditForm({name:selected.name||'',phone:selected.phone||'',email:selected.email||'',arrival_date:selected.arrival_date||'',gender:selected.gender||'',address:selected.address||'',notes:selected.notes||'',house_id:houseAssignments.find(a=>a.tenant_id===selected.id)?.house_id||''});setEditing(true);setNotice({text:'',type:'info'})}}>Modifier la fiche</button><button className="secondary-button" disabled={busy} onClick={toggle}>{selected.active?'Désactiver':'Réactiver'}</button></div>
+        <div className="tenant-profile-identity">{selected.photo_url?<img className="tenant-profile-avatar record-profile-photo" src={selected.photo_url} alt={'Photo de '+selected.name}/>:<span className="tenant-profile-avatar">{initials(selected.name)}</span>}<div><span className="eyebrow">FICHE LOCATAIRE</span><h1>{selected.name}</h1><p>{selected.phone||'Téléphone non renseigné'}</p></div></div>
+        <div className="tenant-profile-actions"><span className={'tenant-directory-status '+(selected.active?'active':'inactive')}>{selected.active?'Actif':'Inactif'}</span><button className="secondary-button" onClick={()=>{setEditForm({name:selected.name||'',phone:selected.phone||'',email:selected.email||'',arrival_date:selected.arrival_date||'',gender:selected.gender||'',address:selected.address||'',notes:selected.notes||'',photo_url:selected.photo_url||'',house_id:houseAssignments.find(a=>a.tenant_id===selected.id)?.house_id||''});setEditing(true);setNotice({text:'',type:'info'})}}>Modifier la fiche</button><button className="secondary-button" disabled={busy} onClick={toggle}>{selected.active?'Désactiver':'Réactiver'}</button></div>
       </section>
       {detailLoading?<div className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement de la fiche et de son historique…</div></div>:<>
         <div className="tenant-profile-metrics"><article className="tenant-profile-metric"><span>Facturé au total</span><strong>{fcfa(totalBilled)}</strong></article><article className="tenant-profile-metric"><span>Payé au total</span><strong>{fcfa(totalPaid)}</strong></article><article className="tenant-profile-metric"><span>Solde restant</span><strong>{fcfa(totalDue)}</strong></article><article className="tenant-profile-metric"><span>Consommation cumulée</span><strong>{details.readings.reduce((s,r)=>s+Math.max(0,Number(r.curr_index)-Number(r.prev_index)),0).toLocaleString('fr-FR')} kWh</strong></article></div>
