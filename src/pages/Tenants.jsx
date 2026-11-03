@@ -11,6 +11,7 @@ export default function Tenants() {
   const [details,setDetails]=useState({readings:[],bills:[],payments:[],periods:[]})
   const [form,setForm]=useState({name:'',phone:'',meter_no:''})
   const [editing,setEditing]=useState(false)
+  const [editForm,setEditForm]=useState({name:'',phone:'',meter_no:''})
   const [showAdd,setShowAdd]=useState(false)
   const [section,setSection]=useState('overview')
   const [loading,setLoading]=useState(true)
@@ -53,9 +54,9 @@ export default function Tenants() {
     setForm({name:'',phone:'',meter_no:''});setShowAdd(false);setNotice({text:'Locataire ajouté avec succès.',type:'success'});openTenant(data)
   }
   const save=async()=>{
-    if(!selected?.name?.trim()){setNotice({text:'Le nom du locataire est obligatoire.',type:'error'});return}
+    if(!editForm.name?.trim()){setNotice({text:'Le nom du locataire est obligatoire.',type:'error'});return}
     setBusy(true)
-    const update={name:selected.name.trim(),phone:selected.phone?.trim()||null,meter_no:selected.meter_no?.trim()||null}
+    const update={name:editForm.name.trim(),phone:editForm.phone?.trim()||null,meter_no:editForm.meter_no?.trim()||null}
     const {error}=await supabase.from('tenants').update(update).eq('id',selected.id)
     setBusy(false)
     if(error){setNotice({text:error.message,type:'error'});return}
@@ -76,7 +77,19 @@ export default function Tenants() {
   const currentReading=details.readings.find(r=>r.period_id===currentPeriod?.id)
 
   return <section className="workspace-page tenant-module">
-    {!selected?<>
+    {editing&&selected?<div className="tenant-edit-screen">
+      <header className="tenant-edit-header"><button type="button" className="tenant-back-button" onClick={()=>{setEditing(false);setNotice({text:'',type:'info'})}}>← Retour à la fiche</button><span className="tenant-detail-breadcrumb">Locataires / Modification</span></header>
+      {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':notice.type==='success'?'notice-success':'notice-info')} role={notice.type==='error'?'alert':'status'}>{notice.text}</div>}
+      <section className="tenant-edit-hero"><span className="tenant-profile-avatar">{initials(selected.name)}</span><div><span className="eyebrow">MODIFICATION DU DOSSIER</span><h1>Modifier la fiche</h1><p>Mets à jour les coordonnées et les informations du locataire.</p></div></section>
+      <section className="panel tenant-edit-form-panel"><div className="panel-heading"><div><span className="eyebrow">INFORMATIONS PERSONNELLES</span><h2>{selected.name}</h2><p>Les champs marqués d’un * sont obligatoires.</p></div></div>
+        <div className="tenant-edit-fields">
+          <div className="field"><label htmlFor="edit-tenant-name">Nom complet *</label><input id="edit-tenant-name" autoFocus value={editForm.name} onChange={e=>setEditForm(v=>({...v,name:e.target.value}))} placeholder="Nom et prénom"/></div>
+          <div className="field"><label htmlFor="edit-tenant-phone">Téléphone</label><input id="edit-tenant-phone" type="tel" value={editForm.phone} onChange={e=>setEditForm(v=>({...v,phone:e.target.value}))} placeholder="+237…"/></div>
+          <div className="field"><label htmlFor="edit-tenant-meter">Numéro du compteur actuel</label><input id="edit-tenant-meter" value={editForm.meter_no} onChange={e=>setEditForm(v=>({...v,meter_no:e.target.value}))} placeholder="Référence du compteur"/></div>
+        </div>
+        <div className="tenant-edit-footer"><button type="button" className="secondary-button" disabled={busy} onClick={()=>{setEditing(false);setNotice({text:'',type:'info'})}}>Annuler</button><button type="button" className="primary-button" disabled={busy} onClick={save}>{busy?'Enregistrement…':'Enregistrer les modifications'}</button></div>
+      </section>
+    </div>:!selected?<>
       <header className="page-heading tenant-page-heading"><div><span className="eyebrow">GESTION DES OCCUPANTS</span><h1>Locataires</h1><p>Retrouve les fiches des occupants et consulte leur situation en un seul endroit.</p></div><button className="primary-button" onClick={()=>{setShowAdd(v=>!v);setNotice({text:'',type:'info'})}}>{showAdd?'Fermer':'＋ Ajouter un locataire'}</button></header>
       {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':notice.type==='success'?'notice-success':'notice-info')} role={notice.type==='error'?'alert':'status'}>{notice.text}</div>}
       {showAdd&&<section className="panel tenant-add-panel"><div className="panel-heading"><div><span className="eyebrow">NOUVELLE FICHE</span><h2>Ajouter un locataire</h2></div></div><div className="tenant-form-grid"><div className="field"><label htmlFor="tenant-name">Nom complet *</label><input id="tenant-name" autoFocus value={form.name} onChange={e=>setForm(v=>({...v,name:e.target.value}))} placeholder="Nom et prénom"/></div><div className="field"><label htmlFor="tenant-phone">Téléphone</label><input id="tenant-phone" value={form.phone} onChange={e=>setForm(v=>({...v,phone:e.target.value}))} placeholder="+237…"/></div><div className="field"><label htmlFor="tenant-meter">Numéro du compteur actuel</label><input id="tenant-meter" value={form.meter_no} onChange={e=>setForm(v=>({...v,meter_no:e.target.value}))} placeholder="Référence compteur"/></div><div className="tenant-form-actions"><button className="primary-button" disabled={busy} onClick={add}>{busy?'Enregistrement…':'Enregistrer le locataire'}</button></div></div></section>}
@@ -89,9 +102,8 @@ export default function Tenants() {
       {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':notice.type==='success'?'notice-success':'notice-info')} role={notice.type==='error'?'alert':'status'}>{notice.text}</div>}
       <section className="tenant-profile-card">
         <div className="tenant-profile-identity"><span className="tenant-profile-avatar">{initials(selected.name)}</span><div><span className="eyebrow">FICHE LOCATAIRE</span><h1>{selected.name}</h1><p>{selected.phone||'Téléphone non renseigné'}</p></div></div>
-        <div className="tenant-profile-actions"><span className={'tenant-directory-status '+(selected.active?'active':'inactive')}>{selected.active?'Actif':'Inactif'}</span><button className="secondary-button" onClick={()=>{setEditing(v=>!v);setNotice({text:'',type:'info'})}}>{editing?'Annuler':'Modifier la fiche'}</button><button className="secondary-button" disabled={busy} onClick={toggle}>{selected.active?'Désactiver':'Réactiver'}</button></div>
+        <div className="tenant-profile-actions"><span className={'tenant-directory-status '+(selected.active?'active':'inactive')}>{selected.active?'Actif':'Inactif'}</span><button className="secondary-button" onClick={()=>{setEditForm({name:selected.name||'',phone:selected.phone||'',meter_no:selected.meter_no||''});setEditing(true);setNotice({text:'',type:'info'})}}>Modifier la fiche</button><button className="secondary-button" disabled={busy} onClick={toggle}>{selected.active?'Désactiver':'Réactiver'}</button></div>
       </section>
-      {editing&&<section className="panel tenant-edit-panel"><div className="tenant-form-grid"><div className="field"><label htmlFor="edit-tenant-name">Nom complet *</label><input id="edit-tenant-name" value={selected.name} onChange={e=>setSelected(v=>({...v,name:e.target.value}))}/></div><div className="field"><label htmlFor="edit-tenant-phone">Téléphone</label><input id="edit-tenant-phone" value={selected.phone||''} onChange={e=>setSelected(v=>({...v,phone:e.target.value}))}/></div><div className="field"><label htmlFor="edit-tenant-meter">Compteur actuel</label><input id="edit-tenant-meter" value={selected.meter_no||''} onChange={e=>setSelected(v=>({...v,meter_no:e.target.value}))}/></div><div className="tenant-form-actions"><button className="primary-button" disabled={busy} onClick={save}>{busy?'Enregistrement…':'Enregistrer les modifications'}</button></div></div></section>}
       {detailLoading?<div className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement de la fiche et de son historique…</div></div>:<>
         <div className="tenant-profile-metrics"><article className="tenant-profile-metric"><span>Facturé au total</span><strong>{fcfa(totalBilled)}</strong></article><article className="tenant-profile-metric"><span>Payé au total</span><strong>{fcfa(totalPaid)}</strong></article><article className="tenant-profile-metric"><span>Solde restant</span><strong>{fcfa(totalDue)}</strong></article><article className="tenant-profile-metric"><span>Consommation cumulée</span><strong>{details.readings.reduce((s,r)=>s+Math.max(0,Number(r.curr_index)-Number(r.prev_index)),0).toLocaleString('fr-FR')} kWh</strong></article></div>
         <nav className="tenant-profile-shortcuts" aria-label="Informations du locataire">{[{id:'overview',icon:'▦',label:'Vue d’ensemble',count:''},{id:'meters',icon:'◉',label:'Compteurs',count:details.readings.length},{id:'readings',icon:'ϟ',label:'Relevés',count:details.readings.length},{id:'invoices',icon:'▤',label:'Factures',count:details.bills.length},{id:'payments',icon:'↗',label:'Paiements',count:details.payments.length}].map(item=><button type="button" key={item.id} className={section===item.id?'tenant-profile-shortcut active':'tenant-profile-shortcut'} onClick={()=>setSection(item.id)}><span>{item.icon}</span><strong>{item.label}</strong>{item.count!==''&&<small>{item.count}</small>}</button>)}</nav>
