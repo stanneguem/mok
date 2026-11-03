@@ -47,3 +47,10 @@ using (
   bucket_id = 'mok-record-photos'
   and (storage.foldername(name))[1] = (select auth.uid()::text)
 );
+
+alter table public.houses
+  drop constraint if exists houses_photo_urls_max_six;
+
+alter table public.houses
+  add constraint houses_photo_urls_max_six
+  check (cardinality(photo_urls) <= 6);
