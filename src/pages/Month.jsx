@@ -18,6 +18,9 @@ export default function Month() {
   const [np,setNp]=useState({month:'',kwh_price:''})
   const [main,setMain]=useState({main_index:'',main_amount:''})
   const [dist,setDist]=useState(localISODate())
+  const [readingsCollapsed,setReadingsCollapsed]=useState(false)
+  const [selectedTenantId,setSelectedTenantId]=useState('')
+  const [readingEditorOpen,setReadingEditorOpen]=useState(false)
   const period=periods.find(p=>p.id===pid)
   const notify=(text,type='info')=>setMsg({text,type})
 
@@ -49,7 +52,7 @@ export default function Month() {
     tenants.forEach(tenant=>{
       const current=(currentReadings.data||[]).find(row=>row.tenant_id===tenant.id)
       const old=(previousReadings.data||[]).find(row=>row.tenant_id===tenant.id)
-      values[tenant.id]={prev:current?.prev_index??old?.curr_index??0,curr:current?.curr_index??''}
+      values[tenant.id]={prev:current?.prev_index??old?.curr_index??0,curr:current?.curr_index??'',saved:!!current}
     })
     setIdx(values);setBills(currentBills.data||[])
     setMain({main_index:period.main_index??'',main_amount:period.main_amount??''})
@@ -70,15 +73,21 @@ export default function Month() {
     finally{setBusy(false)}
   }
 
-  const saveReadings=async()=>{
-    if(!pid){notify('Choisis une période.','error');return}
-    const rows=tenants.filter(t=>idx[t.id]?.curr!=='').map(t=>({period_id:pid,tenant_id:t.id,prev_index:Number(idx[t.id].prev),curr_index:Number(idx[t.id].curr)}))
-    if(!rows.length){notify('Saisis au moins un index actuel avant de continuer.','error');return}
-    const bad=rows.find(r=>!Number.isFinite(r.prev_index)||!Number.isFinite(r.curr_index)||r.prev_index<0||r.curr_index<r.prev_index)
-    if(bad){notify('Chaque index doit être positif ou nul et l’index actuel ne peut pas être inférieur au précédent.','error');return}
+  const saveTenantReading=async()=>{
+    const tenant=tenants.find(item=>item.id===selectedTenantId)
+    const value=idx[selectedTenantId]||{}
+    if(!tenant||!pid){notify('Sélectionne un locataire et une période avant de continuer.','error');return}
+    if(value.curr===''||value.curr===undefined){notify('Renseigne le nouvel index du compteur.','error');return}
+    const prev=Number(value.prev),curr=Number(value.curr)
+    if(!Number.isFinite(prev)||!Number.isFinite(curr)||prev<0||curr<prev){notify('Les index doivent être positifs ou nuls et le nouvel index ne peut pas être inférieur au précédent.','error');return}
     setBusy(true)
-    try{const {error}=await supabase.from('readings').upsert(rows,{onConflict:'period_id,tenant_id'});if(error)throw error;notify('Les relevés ont été enregistrés.','success');await loadPeriod()}
-    catch(error){notify(error.message||'Impossible d’enregistrer les relevés.','error')}
+    try{
+      const {error}=await supabase.from('readings').upsert({period_id:pid,tenant_id:tenant.id,prev_index:prev,curr_index:curr},{onConflict:'period_id,tenant_id'})
+      if(error)throw error
+      setIdx(current=>({...current,[tenant.id]:{...current[tenant.id],prev,curr,saved:true}}))
+      setReadingEditorOpen(false)
+      notify('Le relevé de '+tenant.name+' a été enregistré.','success')
+    }catch(error){notify(error.message||'Impossible d’enregistrer ce relevé.','error')}
     finally{setBusy(false)}
   }
 
@@ -149,7 +158,9 @@ export default function Month() {
     finally{setBusy(false)}
   }
 
-  const readingCount=tenants.filter(t=>idx[t.id]?.curr!==''&&idx[t.id]?.curr!==undefined).length
+  const readingCount=tenants.filter(t=>idx[t.id]?.saved).length
+  const selectedTenant=tenants.find(t=>t.id===selectedTenantId)
+  const selectedReading=selectedTenant?idx[selectedTenant.id]||:{}
   const totalBilled=sum(bills,'total'),totalConsumption=sum(bills,'consumption')
   const totalPaid=bills.reduce((acc,b)=>acc+(b.payments||[]).reduce((s,p)=>s+Number(p.amount||0),0),0)
   const totalDue=totalBilled-totalPaid
@@ -178,12 +189,21 @@ export default function Month() {
         <article className="summary-card"><span className="summary-label">Reste à encaisser</span><strong>{money(totalDue)}</strong><span className="summary-foot">Sur {money(totalBilled)} facturés</span></article>
       </div>
 
-      <section className="panel step-panel">
-        <div className="panel-heading"><div><div className="step-title"><span className="step-number">1</span><h2>Relevés des compteurs individuels</h2></div><p className="step-description">Saisis l’index précédent et le nouvel index de chaque locataire.</p></div><div className="progress-strip"><span>{readingCount}/{tenants.length}</span><span className="progress-track"><span className="progress-fill" style={{width:(tenants.length?readingCount/tenants.length*100:0)+'%'}}/></span></div></div>
-        {tenants.length===0?<div className="empty-state"><h3>Aucun locataire actif</h3><p>Ajoute ou réactive des locataires avant de saisir les relevés.</p></div>:<>
-          <div className="table-scroll"><table className="data-table"><thead><tr><th>Locataire</th><th>Index précédent</th><th>Index actuel</th><th>Consommation</th></tr></thead><tbody>{tenants.map(t=>{const value=idx[t.id]||{};const previous=Number(value.prev||0);const current=value.curr===''||value.curr===undefined?null:Number(value.curr);const consumption=current===null?'—':Math.max(0,current-previous);return <tr key={t.id}><td><strong>{t.name}</strong></td><td><input aria-label={'Index précédent de '+t.name} type="number" min="0" step="1" value={value.prev??''} onChange={e=>setIdx({...idx,[t.id]:{...value,prev:e.target.value}})}/></td><td><input aria-label={'Index actuel de '+t.name} type="number" min="0" step="1" value={value.curr??''} onChange={e=>setIdx({...idx,[t.id]:{...value,curr:e.target.value}})}/></td><td>{consumption==='—'?'—':consumption.toLocaleString('fr-FR')+' kWh'}</td></tr>})}</tbody></table></div>
-          <div className="panel-actions"><button className="primary-button" disabled={busy||!readingCount} onClick={saveReadings}>{busy?'Enregistrement…':'Enregistrer les relevés'}</button><span className="muted-help">Les index actuels sont requis pour générer les factures.</span></div>
-        </>}
+      <section className="panel step-panel reading-section">
+        <button type="button" className="reading-section-toggle" onClick={()=>setReadingsCollapsed(value=>!value)} aria-expanded={!readingsCollapsed}>
+          <span className="reading-section-title"><span className="step-number">1</span><span><strong>Relevés des compteurs individuels</strong><small>Saisis les index de chaque locataire, un par un.</small></span></span>
+          <span className="reading-section-meta"><span className="reading-count">{readingCount}/{tenants.length} terminés</span><span className="progress-track"><span className="progress-fill" style={{width:(tenants.length?readingCount/tenants.length*100:0)+'%'}}/></span><span className={'collapse-chevron '+(readingsCollapsed?'is-collapsed':'')}>⌄</span></span>
+        </button>
+        {!readingsCollapsed&&<div className="reading-section-body">
+          {tenants.length===0?<div className="empty-state"><h3>Aucun locataire actif</h3><p>Ajoute ou réactive des locataires avant de saisir les relevés.</p></div>:!selectedTenant?<div className="tenant-reading-list">
+            <div className="reading-list-intro"><span>CHOISIR UN LOCATAIRE</span><small>Clique sur un locataire pour consulter ses informations et ouvrir son relevé.</small></div>
+            {tenants.map(tenant=>{const value=idx[tenant.id]||{};const done=!!value.saved;const usage=done?Math.max(0,Number(value.curr)-Number(value.prev)):null;return <button type="button" className="tenant-reading-card" key={tenant.id} onClick={()=>{setSelectedTenantId(tenant.id);setReadingEditorOpen(false)}}><span className="tenant-reading-avatar">{(tenant.name||'?').trim().charAt(0).toUpperCase()}</span><span className="tenant-reading-info"><strong>{tenant.name}</strong><small>{tenant.meter_no?'Compteur · '+tenant.meter_no:'Compteur non renseigné'}</small></span><span className={'tenant-reading-status '+(done?'is-done':'is-pending')}>{done?'Relevé enregistré':'À relever'}{done&&<small>{usage.toLocaleString('fr-FR')} kWh</small>}</span><span className="tenant-reading-arrow">›</span></button>})}
+          </div>:<div className="tenant-reading-detail">
+            <button type="button" className="back-to-tenants" onClick={()=>{setSelectedTenantId('');setReadingEditorOpen(false)}}>← Retour à la liste des locataires</button>
+            <div className="tenant-detail-card"><span className="tenant-detail-avatar">{(selectedTenant.name||'?').trim().charAt(0).toUpperCase()}</span><div className="tenant-detail-main"><span className="eyebrow">FICHE DU LOCATAIRE</span><h3>{selectedTenant.name}</h3><div className="tenant-detail-meta"><span>{selectedTenant.phone||'Téléphone non renseigné'}</span><span>{selectedTenant.meter_no?'Compteur : '+selectedTenant.meter_no:'N° compteur non renseigné'}</span></div></div><span className={'tenant-reading-status '+(selectedReading.saved?'is-done':'is-pending')}>{selectedReading.saved?'Relevé effectué':'En attente'}</span></div>
+            {!readingEditorOpen?<div className="reading-detail-summary">{selectedReading.saved?<div className="saved-reading-box"><span>DERNIER RELEVÉ POUR CETTE PÉRIODE</span><div className="saved-reading-values"><div><small>Index précédent</small><strong>{Number(selectedReading.prev).toLocaleString('fr-FR')}</strong></div><div><small>Index actuel</small><strong>{Number(selectedReading.curr).toLocaleString('fr-FR')}</strong></div><div><small>Consommation</small><strong>{Math.max(0,Number(selectedReading.curr)-Number(selectedReading.prev)).toLocaleString('fr-FR')} kWh</strong></div></div></div>:<div className="reading-prompt"><strong>Aucun relevé enregistré pour ce locataire.</strong><p>Ouvre le formulaire pour saisir les index du compteur de cette période.</p></div>}<button type="button" className="primary-button reading-start-button" onClick={()=>setReadingEditorOpen(true)}>{selectedReading.saved?'Modifier le relevé':'＋ Faire un relevé'}</button></div>:<div className="reading-editor"><div className="reading-editor-heading"><div><span className="eyebrow">NOUVEAU RELEVÉ</span><h3>Compteur de {selectedTenant.name}</h3><p>Renseigne les index indiqués sur le compteur.</p></div><button type="button" className="secondary-button" onClick={()=>setReadingEditorOpen(false)}>Fermer</button></div><div className="reading-editor-fields"><div className="field"><label htmlFor="tenant-prev-index">Index précédent</label><input id="tenant-prev-index" type="number" min="0" step="1" value={selectedReading.prev??''} onChange={e=>setIdx(current=>({...current,[selectedTenant.id]:{...current[selectedTenant.id],prev:e.target.value}}))}/><small>Index de référence du précédent relevé</small></div><div className="field"><label htmlFor="tenant-current-index">Nouvel index</label><input id="tenant-current-index" type="number" min="0" step="1" placeholder="Saisir l’index actuel" value={selectedReading.curr??''} onChange={e=>setIdx(current=>({...current,[selectedTenant.id]:{...current[selectedTenant.id],curr:e.target.value}}))}/><small>Nouvelle valeur affichée sur le compteur</small></div></div><div className="reading-live-usage"><span>Consommation calculée</span><strong>{selectedReading.curr!==''&&selectedReading.curr!==undefined&&Number.isFinite(Number(selectedReading.curr))&&Number(selectedReading.curr)>=Number(selectedReading.prev)?(Number(selectedReading.curr)-Number(selectedReading.prev)).toLocaleString('fr-FR')+' kWh':'—'}</strong></div><div className="panel-actions"><button type="button" className="primary-button" disabled={busy} onClick={saveTenantReading}>{busy?'Enregistrement…':'Enregistrer ce relevé'}</button><button type="button" className="secondary-button" disabled={busy} onClick={()=>setReadingEditorOpen(false)}>Annuler</button></div></div>}
+          </div>}
+        </div>}
       </section>
 
       <section className="panel step-panel">
