@@ -209,6 +209,7 @@ export default function Month({view='readings'}) {
       )}
 
       {view === "invoices" && (
+      <>
       <section className="panel step-panel">
         <div className="panel-heading"><div><div className="step-title"><span className="step-number">2</span><h2>Factures des locataires</h2></div><p className="step-description">Génère les montants à payer à partir des relevés et des éventuels reports.</p></div></div>
         <div className="panel-actions"><div className="inline-field"><label htmlFor="distribution-date">Date de distribution</label><input id="distribution-date" type="date" value={dist} onChange={e=>setDist(e.target.value)}/></div><button className="primary-button" disabled={busy||!allReadingsDone} onClick={generateBills}>{busy?'Traitement…':'Générer / actualiser les factures'}</button><button className="secondary-button" disabled={busy||!bills.length} onClick={bilanPdf}>↓ Télécharger le bilan PDF</button></div>
@@ -228,6 +229,7 @@ export default function Month({view='readings'}) {
         </div>
         {period.main_amount!==null&&period.main_amount!==undefined&&<div className="metric-inline" style={{marginTop:15}}><span className="metric-pill">Facture générale : <strong>{money(period.main_amount)}</strong></span><span className="metric-pill">Résidu calculé : <strong>{money(period.residual||0)}</strong></span><span className="metric-pill">{Number(period.residual||0)<0?'Affecté au fonds d’urgence':'À répartir le mois suivant'}</span></div>}
       </section>
+      </>
       )}
     </>}
   </section>
