@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react'
 import {supabase} from '../supabase'
 import RecordPhotoField from '../components/RecordPhotoField'
-const empty={name:'',address:'',city:'',neighborhood:'',building:'',floor:'',door_number:'',description:''}
+const empty={name:'',address:'',city:'',neighborhood:'',building:'',floor:'',door_number:'',description:'',photo_urls:[]}
 const dateLabel=v=>v?new Date(v+'T00:00:00').toLocaleDateString('fr-FR'):'—'
 export default function Houses(){
  const [rows,setRows]=useState([]),[tenants,setTenants]=useState([]),[assignments,setAssignments]=useState([]),[meters,setMeters]=useState([]),[meterAssignments,setMeterAssignments]=useState([])
@@ -27,7 +27,7 @@ export default function Houses(){
  const beginEdit=()=>{setForm(Object.fromEntries(Object.keys(empty).map(k=>[k,selected[k]||''])));setMode('edit');setNotice({text:'',type:'info'})}
  const save=async()=>{
   if(!form.name.trim())return setNotice({text:'Le nom ou la référence de la maison est obligatoire.',type:'error'})
-  setBusy(true);const payload={...form,name:form.name.trim()}
+  setBusy(true);const payload={...form,name:form.name.trim(),photo_urls:form.photo_urls||[]}
   const res=mode==='edit'?await supabase.from('houses').update(payload).eq('id',selected.id).select().single():await supabase.from('houses').insert(payload).select().single()
   setBusy(false);if(res.error)return setNotice({text:res.error.message,type:'error'})
   await load();setSelected(res.data);setMode('detail');setNotice({text:mode==='edit'?'Maison mise à jour.':'Maison ajoutée.',type:'success'})
@@ -51,6 +51,7 @@ export default function Houses(){
   {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':'notice-success')}>{notice.text}</div>}
   <section className="tenant-edit-hero"><span className="tenant-profile-avatar">⌂</span><div><span className="eyebrow">{mode==='edit'?'MODIFICATION':'NOUVEAU LOGEMENT'}</span><h1>{mode==='edit'?'Modifier la maison':'Ajouter une maison'}</h1><p>Renseigne les informations du logement.</p></div></section>
   <section className="panel tenant-edit-form-panel"><div className="panel-heading"><div><span className="eyebrow">INFORMATIONS DU LOGEMENT</span><h2>{form.name||'Nouvelle maison'}</h2></div></div>
+   <RecordPhotoField value={form.photo_urls} multiple max={6} label="Photos de la maison (6 maximum)" onChange={photo_urls=>setForm(v=>({...v,photo_urls}))}/>
    <div className="tenant-edit-fields">
     <div className="field"><label>Nom / Référence *</label><input autoFocus value={form.name} onChange={e=>setForm(v=>({...v,name:e.target.value}))} placeholder="Maison principale"/></div>
     <div className="field"><label>Adresse</label><input value={form.address} onChange={e=>setForm(v=>({...v,address:e.target.value}))}/></div>
@@ -67,6 +68,7 @@ export default function Houses(){
   <header className="tenant-detail-toolbar"><button className="tenant-back-button" onClick={back}>← <span>Liste des maisons</span></button><span className="tenant-detail-breadcrumb">Fiche maison</span></header>
   {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':'notice-success')}>{notice.text}</div>}
   <section className="tenant-profile-card"><div className="tenant-profile-identity"><span className="tenant-profile-avatar">⌂</span><div><span className="eyebrow">FICHE MAISON</span><h1>{selected.name}</h1><p>{[selected.address,selected.neighborhood,selected.city].filter(Boolean).join(' · ')||'Adresse non renseignée'}</p></div></div><div className="tenant-profile-actions"><span className={'tenant-directory-status '+(selected.active?'active':'inactive')}>{selected.active?'Active':'Inactive'}</span><button className="secondary-button" onClick={beginEdit}>Modifier la maison</button></div></section>
+  {selected.photo_urls?.length>0&&<section className="panel"><div className="panel-heading"><div><span className="eyebrow">GALERIE</span><h2>Photos de la maison</h2></div></div><div className="record-photo-gallery">{selected.photo_urls.map((url,i)=><img src={url} alt={'Maison '+selected.name+' '+(i+1)} key={url}/>)}</div></section>}
   <div className="tenant-profile-metrics"><article className="tenant-profile-metric"><span>Occupant actuel</span><strong>{activeTenant?.tenants?.name||'Aucun'}</strong></article><article className="tenant-profile-metric"><span>Compteur actuel</span><strong>{activeMeter?.meters?.meter_number||'Aucun'}</strong></article><article className="tenant-profile-metric"><span>Historique locataires</span><strong>{history.length}</strong></article><article className="tenant-profile-metric"><span>Historique compteurs</span><strong>{meterHistory.length}</strong></article></div>
   <div className="tenant-detail-grid">
    <section className="panel"><div className="panel-heading"><div><span className="eyebrow">OCCUPATION</span><h2>Locataire actuel</h2></div></div>
@@ -80,7 +82,7 @@ export default function Houses(){
   <header className="page-heading tenant-page-heading"><div><span className="eyebrow">PATRIMOINE IMMOBILIER</span><h1>Maisons</h1><p>Consulte les logements, leurs occupants et les compteurs installés.</p></div><button className="primary-button" onClick={beginAdd}>＋ Ajouter une maison</button></header>
   {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':'notice-success')}>{notice.text}</div>}
   <div className="tenant-list-toolbar"><div className="tenant-search"><span>⌕</span><input placeholder="Rechercher une maison…" value={query} onChange={e=>setQuery(e.target.value)}/></div><span className="tenant-list-count">{filtered.length} / {rows.length} maison{rows.length>1?'s':''}</span></div>
-  <section className="tenant-directory">{loading?<div className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement des maisons…</div></div>:filtered.length===0?<div className="panel empty-state"><span className="empty-icon">⌂</span><h3>{query?'Aucun résultat':'Aucune maison enregistrée'}</h3><p>Ajoute une maison pour commencer.</p></div>:filtered.map(h=>{const tenant=currentTenant(h),meter=currentMeter(h);return <button type="button" className="tenant-directory-card" key={h.id} onClick={()=>{setSelected(h);setMode('detail');setNotice({text:'',type:'info'})}}><span className="tenant-directory-avatar">⌂</span><span className="tenant-directory-main"><strong>{h.name}</strong><small>{[h.address,h.neighborhood,h.city].filter(Boolean).join(' · ')||'Adresse non renseignée'} <i>·</i> {tenant?.tenants?.name||'Disponible'}</small></span><span className={'tenant-directory-status '+(h.active?'active':'inactive')}>{meter?.meters?.meter_number||'Sans compteur'}</span><span className="tenant-directory-chevron">›</span></button>})}</section>
+  <section className="tenant-directory">{loading?<div className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement des maisons…</div></div>:filtered.length===0?<div className="panel empty-state"><span className="empty-icon">⌂</span><h3>{query?'Aucun résultat':'Aucune maison enregistrée'}</h3><p>Ajoute une maison pour commencer.</p></div>:filtered.map(h=>{const tenant=currentTenant(h),meter=currentMeter(h);return <button type="button" className="tenant-directory-card" key={h.id} onClick={()=>{setSelected(h);setMode('detail');setNotice({text:'',type:'info'})}}>{h.photo_urls?.[0]?<img className="tenant-directory-avatar record-directory-photo" src={h.photo_urls[0]} alt=""/>:<span className="tenant-directory-avatar">⌂</span>}<span className="tenant-directory-main"><strong>{h.name}</strong><small>{[h.address,h.neighborhood,h.city].filter(Boolean).join(' · ')||'Adresse non renseignée'} <i>·</i> {tenant?.tenants?.name||'Disponible'}</small></span><span className={'tenant-directory-status '+(h.active?'active':'inactive')}>{meter?.meters?.meter_number||'Sans compteur'}</span><span className="tenant-directory-chevron">›</span></button>})}</section>
  </>}
  </section>
 }
