@@ -401,3 +401,9 @@ td,th{padding:10px 12px;border-bottom:1px solid #e1e6e2;text-align:left}
  .tenant-edit-footer{flex-direction:column-reverse}
  .tenant-edit-footer button{width:100%}
 }
+
+
+/* Dedicated tenant creation screen */
+.tenant-add-screen{display:flex;flex-direction:column;gap:18px;max-width:900px;width:100%;margin:0 auto}
+.tenant-add-screen .tenant-edit-hero .tenant-profile-avatar{background:#e7f4eb;color:#287447}
+:root[data-theme="dark"] .tenant-add-screen .tenant-edit-hero .tenant-profile-avatar{background:#294333;color:#a9dfb8}
