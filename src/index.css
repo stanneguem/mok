@@ -257,3 +257,11 @@ td,th{padding:10px 12px;border-bottom:1px solid #e1e6e2;text-align:left}
 :root[data-theme="dark"] .dashboard-status-copy strong,:root[data-theme="dark"] .dashboard-shortcut strong{color:#d3e4d8}
 :root[data-theme="dark"] .dashboard-shortcut{border-color:#34493a;background:#1d2c23}
 :root[data-theme="dark"] .dashboard-shortcut:hover{border-color:#5a8968;background:#23382a}
+
+/* Navigation modulaire MOK : navigation mobile horizontale pour tous les modules */
+@media(max-width:760px){
+  .mobile-bottom-nav{display:flex;overflow-x:auto;overflow-y:hidden;gap:5px;justify-content:flex-start;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .mobile-bottom-nav::-webkit-scrollbar{display:none}
+  .mobile-nav-item{flex:0 0 72px;min-width:72px}
+  .app-content{padding-bottom:100px}
+}
