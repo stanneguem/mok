@@ -28,17 +28,17 @@ export default function Tenants() {
   const filtered=useMemo(()=>{const q=query.trim().toLocaleLowerCase('fr');if(!q)return list;return list.filter(t=>[t.name,t.phone,t.meter_no].some(v=>(v||'').toLocaleLowerCase('fr').includes(q)))},[list,query])
   const openTenant=async tenant=>{
     setSelected(tenant);setEditing(false);setSection('overview');setDetailLoading(true)
-    const [r,b,p,periods]=await Promise.all([
+    const [r,b,periods]=await Promise.all([
       supabase.from('readings').select('id,period_id,prev_index,curr_index,periods(month)').eq('tenant_id',tenant.id).order('period_id',{ascending:false}),
       supabase.from('bills').select('id,period_id,consumption,conso_amount,residual_share,carry,penalty,total,due_on,periods(month),payments(id,amount,paid_on)').eq('tenant_id',tenant.id).order('period_id',{ascending:false}),
-      supabase.from('payments').select('id,bill_id,amount,paid_on').order('paid_on',{ascending:false}),
       supabase.from('periods').select('id,month').order('month',{ascending:false})
     ])
-    const error=r.error||b.error||p.error||periods.error
+    const error=r.error||b.error||periods.error
     if(error)setNotice({text:'Impossible de charger toutes les informations : '+error.message,type:'error'})
     else {
-      const tenantBills=b.data||[],billIds=new Set(tenantBills.map(x=>x.id))
-      setDetails({readings:r.data||[],bills:tenantBills,payments:(p.data||[]).filter(x=>billIds.has(x.bill_id)),periods:periods.data||[]})
+      const tenantBills=b.data||[]
+      const tenantPayments=tenantBills.flatMap(bill=>(bill.payments||[]).map(payment=>({...payment,bill_id:bill.id}))).sort((a,b)=>String(b.paid_on||'').localeCompare(String(a.paid_on||'')))
+      setDetails({readings:r.data||[],bills:tenantBills,payments:tenantPayments,periods:periods.data||[]})
     }
     setDetailLoading(false)
   }
