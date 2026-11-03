@@ -182,13 +182,6 @@ export default function Month({view='readings'}) {
 
     {msg.text&&<div className={'notice '+(msg.type==='error'?'notice-error':msg.type==='success'?'notice-success':'notice-info')} role={msg.type==='error'?'alert':'status'}><span className="notice-icon">{msg.type==='error'?'!':msg.type==='success'?'✓':'i'}</span><span>{msg.text}</span></div>}
     {loading?<section className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement de tes périodes et locataires…</div></section>:!period?<section className="panel"><div className="empty-state"><span className="empty-icon">▦</span><h3>Aucune période sélectionnée</h3><p>Crée ton premier mois ou sélectionne une période existante pour commencer la gestion.</p></div></section>:<>
-      <div className="summary-grid">
-        <article className="summary-card summary-primary"><span className="summary-label">Période active</span><strong>{fmtMonth(period.month)}</strong><span className="summary-foot">Prix kWh : {money(period.kwh_price)}</span></article>
-        <article className="summary-card"><span className="summary-label">Locataires actifs</span><strong>{tenants.length}</strong><span className="summary-foot">Personnes à facturer</span></article>
-        <article className="summary-card"><span className="summary-label">Consommation relevée</span><strong>{totalConsumption.toLocaleString('fr-FR')} kWh</strong><span className="summary-foot">{readingCount} / {tenants.length} relevés saisis</span></article>
-        <article className="summary-card"><span className="summary-label">Reste à encaisser</span><strong>{money(totalDue)}</strong><span className="summary-foot">Sur {money(totalBilled)} facturés</span></article>
-      </div>
-
       {view === "readings" && (
       <section className="panel step-panel reading-section">
         <button type="button" className="reading-section-toggle" onClick={()=>setReadingsCollapsed(value=>!value)} aria-expanded={!readingsCollapsed}>
