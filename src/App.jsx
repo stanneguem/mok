@@ -4,14 +4,20 @@ import Tenants from './pages/Tenants'
 import Month from './pages/Month'
 import Payments from './pages/Payments'
 import Dashboard from './pages/Dashboard'
+import Meters from './pages/Meters'
+import Consumption from './pages/Consumption'
+import Settings from './pages/Settings'
 
 const navigation = [
   {id: "home", label: "Tableau de bord", short: "Accueil", icon: "⌂"},
   {id: "readings", label: "Relevés", short: "Relevés", icon: "▤"},
-  {id: "invoices", label: "Facturation", short: "Factures", icon: "▧"},
   {id: "pay", label: "Paiements", short: "Paiements", icon: "↗"},
+  {id: "invoices", label: "Factures", short: "Factures", icon: "▧"},
   {id: "tenants", label: "Locataires", short: "Locataires", icon: "♙"},
-  {id: "fund", label: "Fonds d'urgence", short: "Fonds", icon: "◈"}
+  {id: "fund", label: "Fonds", short: "Fonds", icon: "◈"},
+  {id: "meters", label: "Compteurs", short: "Compteurs", icon: "◉"},
+  {id: "consumption", label: "Consommation générale", short: "Conso.", icon: "ϟ"},
+  {id: "settings", label: "Paramètres", short: "Réglages", icon: "⚙"}
 ]
 
 function authErrorMessage(error) {
@@ -99,7 +105,7 @@ export default function App() {
   },[])
   if(authChecking)return <main className="auth-loading"><span className="loading-spinner"/><p>Préparation de ton espace…</p></main>
   if(!session)return <Login/>
-  const pages={home:<Dashboard onNavigate={setTab}/>,readings:<Month view="readings"/>,invoices:<Month view="invoices"/>,pay:<Payments/>,tenants:<Tenants/>,fund:<Fund/>}
+  const pages={home:<Dashboard onNavigate={setTab}/>,readings:<Month view="readings"/>,invoices:<Month view="invoices"/>,pay:<Payments/>,tenants:<Tenants/>,fund:<Fund/>,meters:<Meters/>,consumption:<Consumption/>,settings:<Settings theme={theme} onThemeChange={setTheme}/>}
   const active=navigation.find(item=>item.id===tab)||navigation[0]
   return <div className="app-shell">
     <header className="app-topbar"><a className="app-logo" href="#" onClick={e=>{e.preventDefault();setTab('home')}} aria-label="MOK - Accueil"><span className="app-logo-mark">M</span><span>MOK<span className="logo-dot">.</span></span></a>
