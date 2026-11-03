@@ -265,3 +265,112 @@ td,th{padding:10px 12px;border-bottom:1px solid #e1e6e2;text-align:left}
   .mobile-nav-item{flex:0 0 72px;min-width:72px}
   .app-content{padding-bottom:100px}
 }
+
+
+/* Tenant directory and profile module */
+.tenant-module{display:flex;flex-direction:column;gap:17px}
+.tenant-page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.tenant-list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.tenant-search{height:48px;display:flex;align-items:center;gap:11px;flex:1;max-width:620px;padding:0 14px;border:1px solid #e2ebe4;border-radius:12px;background:#fff;color:#72907c}
+.tenant-search>span{font-size:22px}
+.tenant-search input{width:100%;min-width:0;border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:var(--mok-ink);font-size:12px}
+.tenant-search button{border:0;background:transparent;color:#7b8d80;font-size:20px}
+.tenant-list-count{color:#87958b;font-size:11px;font-weight:700;white-space:nowrap}
+.tenant-directory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.tenant-directory-card{display:flex;align-items:center;gap:12px;min-width:0;padding:15px;border:1px solid #e5ede7;border-radius:13px;background:#fff;text-align:left;transition:border-color .18s,transform .18s,box-shadow .18s}
+.tenant-directory-card:hover{transform:translateY(-1px);border-color:#b9d6c2;box-shadow:0 7px 22px rgba(34,75,47,.06)}
+.tenant-directory-avatar,.tenant-profile-avatar{display:grid;place-items:center;flex:0 0 auto;width:43px;height:43px;border-radius:13px;background:#eaf4ed;color:#34784c;font-size:13px;font-weight:850}
+.tenant-directory-main{display:flex;flex:1;flex-direction:column;gap:5px;min-width:0}
+.tenant-directory-main strong{overflow:hidden;color:#2c4333;font-size:12px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.tenant-directory-main small{overflow:hidden;color:#89968d;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.tenant-directory-main i{padding:0 3px;color:#c1cbc3;font-style:normal}
+.tenant-directory-status{display:inline-flex;align-items:center;justify-content:center;padding:5px 9px;border-radius:99px;font-size:9px;font-weight:800;white-space:nowrap}
+.tenant-directory-status.active{background:#eaf5ed;color:#34784c}
+.tenant-directory-status.inactive{background:#f1f2f1;color:#7c8580}
+.tenant-directory-chevron{color:#93a399;font-size:22px}
+.tenant-add-panel,.tenant-edit-panel{padding:19px}
+.tenant-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:end;gap:12px}
+.tenant-form-actions{display:flex;align-items:end}
+.tenant-detail-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.tenant-back-button{border:0;background:transparent;color:#367b50;font-size:11px;font-weight:800}
+.tenant-detail-breadcrumb{color:#96a198;font-size:10px}
+.tenant-profile-card{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px;border:1px solid #e3ece5;border-radius:16px;background:linear-gradient(130deg,#f8fcf9,#edf6ef)}
+.tenant-profile-identity{display:flex;align-items:center;gap:15px;min-width:0}
+.tenant-profile-avatar{width:58px;height:58px;border-radius:17px;font-size:18px}
+.tenant-profile-identity .eyebrow{font-size:8px}
+.tenant-profile-identity h1{margin:4px 0;color:#263d2e;font-size:23px;font-weight:850;letter-spacing:-.035em}
+.tenant-profile-identity p{margin:0;color:#829188;font-size:11px}
+.tenant-profile-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.tenant-profile-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.tenant-profile-metric{display:flex;flex-direction:column;gap:8px;min-width:0;padding:15px;border:1px solid #e6ede7;border-radius:12px;background:#fff}
+.tenant-profile-metric span{color:#849188;font-size:9px;font-weight:650}
+.tenant-profile-metric strong{overflow:hidden;color:#2d4936;font-size:clamp(13px,1.6vw,19px);font-weight:850;text-overflow:ellipsis;white-space:nowrap}
+.tenant-profile-shortcuts{display:flex;gap:7px;overflow-x:auto;padding:3px 0 7px;border-bottom:1px solid #e7eee8;scrollbar-width:thin}
+.tenant-profile-shortcut{display:flex;align-items:center;gap:7px;flex:0 0 auto;padding:10px 13px;border:1px solid transparent;border-radius:10px;background:transparent;color:#75867a;font-size:10px}
+.tenant-profile-shortcut>span{font-size:14px}
+.tenant-profile-shortcut strong{font-size:10px}
+.tenant-profile-shortcut small{display:grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:#edf3ee;color:#63796a;font-size:8px}
+.tenant-profile-shortcut.active{border-color:#d7e8dc;background:#eff7f1;color:#286c43}
+.tenant-profile-shortcut.active strong{color:#286c43}
+.tenant-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.tenant-detail-grid>.panel{padding:19px}
+.tenant-info-list{display:flex;flex-direction:column;gap:0;margin:0}
+.tenant-info-list>div,.tenant-recent-lines>div{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:11px 0;border-top:1px solid #edf1ed}
+.tenant-info-list dt,.tenant-recent-lines span{color:#87948b;font-size:10px}
+.tenant-info-list dd,.tenant-recent-lines strong{margin:0;color:#344d3b;font-size:10px;font-weight:750;text-align:right}
+.tenant-current-meter{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #e6eee7;border-radius:11px;background:#f9fcfa}
+.tenant-meter-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#eaf4ed;color:#34784c;font-size:18px}
+.tenant-current-meter>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.tenant-current-meter strong{overflow-wrap:anywhere;color:#304a38;font-size:12px}
+.tenant-current-meter small{color:#8b988f;font-size:9px}
+.tenant-meter-reading{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:10px 2px;color:#819087;font-size:10px}
+.tenant-meter-reading strong{color:#2c7047;font-size:14px}
+.tenant-inline-link{margin-top:12px;padding:0;border:0;background:transparent;color:#34784c;font-size:10px;font-weight:800}
+.tenant-recent-lines{display:flex;flex-direction:column}
+.tenant-meter-history{margin-top:20px}
+.tenant-meter-history h3{color:#304938;font-size:12px}
+.tenant-history-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #edf1ed;color:#78877d;font-size:10px}
+.tenant-history-row strong{color:#2f7549;text-align:right}
+:root[data-theme="dark"] .tenant-search,:root[data-theme="dark"] .tenant-directory-card,:root[data-theme="dark"] .tenant-profile-metric{border-color:#304337;background:#1b2921}
+:root[data-theme="dark"] .tenant-search{color:#9cdbaf}
+:root[data-theme="dark"] .tenant-directory-main strong,:root[data-theme="dark"] .tenant-profile-identity h1,:root[data-theme="dark"] .tenant-profile-metric strong,:root[data-theme="dark"] .tenant-info-list dd,:root[data-theme="dark"] .tenant-recent-lines strong,:root[data-theme="dark"] .tenant-current-meter strong,:root[data-theme="dark"] .tenant-meter-history h3{color:#dcebe0}
+:root[data-theme="dark"] .tenant-directory-main small,:root[data-theme="dark"] .tenant-profile-identity p,:root[data-theme="dark"] .tenant-profile-metric span,:root[data-theme="dark"] .tenant-info-list dt,:root[data-theme="dark"] .tenant-recent-lines span,:root[data-theme="dark"] .tenant-current-meter small{color:#9bada1}
+:root[data-theme="dark"] .tenant-directory-avatar,:root[data-theme="dark"] .tenant-profile-avatar,:root[data-theme="dark"] .tenant-meter-icon{background:#294333;color:#a9dfb8}
+:root[data-theme="dark"] .tenant-directory-status.active{background:#294a35;color:#b2e6c1}
+:root[data-theme="dark"] .tenant-directory-status.inactive{background:#39413c;color:#b8c2bb}
+:root[data-theme="dark"] .tenant-profile-card{border-color:#34493a;background:linear-gradient(130deg,#22352a,#1b2b22)}
+:root[data-theme="dark"] .tenant-profile-shortcuts{border-color:#304337}
+:root[data-theme="dark"] .tenant-profile-shortcut{color:#a2b4a7}
+:root[data-theme="dark"] .tenant-profile-shortcut.active{border-color:#3b6548;background:#233a2a;color:#a9dfb8}
+:root[data-theme="dark"] .tenant-profile-shortcut.active strong{color:#b9e6c5}
+:root[data-theme="dark"] .tenant-profile-shortcut small{background:#304638;color:#c4d6c9}
+:root[data-theme="dark"] .tenant-current-meter{border-color:#34493a;background:#1e3025}
+:root[data-theme="dark"] .tenant-meter-reading strong,:root[data-theme="dark"] .tenant-inline-link,:root[data-theme="dark"] .tenant-history-row strong,:root[data-theme="dark"] .tenant-back-button{color:#9cdbaf}
+:root[data-theme="dark"] .tenant-info-list>div,:root[data-theme="dark"] .tenant-recent-lines>div,:root[data-theme="dark"] .tenant-history-row{border-color:#304337}
+:root[data-theme="dark"] .tenant-info-list dt,:root[data-theme="dark"] .tenant-recent-lines span,:root[data-theme="dark"] .tenant-history-row{color:#9bada1}
+@media(max-width:900px){.tenant-directory{grid-template-columns:1fr}.tenant-profile-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.tenant-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tenant-detail-grid{grid-template-columns:1fr}}
+@media(max-width:600px){
+ .tenant-page-heading{align-items:stretch;flex-direction:column}
+ .tenant-page-heading>.primary-button{width:100%}
+ .tenant-list-toolbar{align-items:stretch;flex-direction:column;gap:8px}
+ .tenant-search{max-width:none;height:45px}
+ .tenant-list-count{align-self:flex-end}
+ .tenant-directory-card{gap:9px;padding:12px}
+ .tenant-directory-avatar{width:38px;height:38px}
+ .tenant-directory-main strong{font-size:11px}
+ .tenant-directory-main small{font-size:8px}
+ .tenant-directory-status{padding:5px 7px;font-size:8px}
+ .tenant-add-panel,.tenant-edit-panel{padding:14px}
+ .tenant-form-grid{grid-template-columns:1fr}
+ .tenant-form-actions>.primary-button{width:100%}
+ .tenant-profile-card{align-items:flex-start;flex-direction:column;padding:16px}
+ .tenant-profile-identity h1{font-size:19px}
+ .tenant-profile-actions{justify-content:flex-start;width:100%}
+ .tenant-profile-actions>*{flex:1}
+ .tenant-profile-metrics{gap:8px}
+ .tenant-profile-metric{padding:12px}
+ .tenant-profile-metric strong{font-size:14px}
+ .tenant-profile-shortcut{padding:9px 10px}
+ .tenant-history-row{grid-template-columns:1fr 1fr;gap:8px}
+ .tenant-history-row strong{text-align:left}
+}
