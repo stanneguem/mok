@@ -435,3 +435,26 @@ td,th{padding:10px 12px;border-bottom:1px solid #e1e6e2;text-align:left}
 :root[data-theme="dark"] .inventory-edit-link{color:#9cdbaf}
 :root[data-theme="dark"] .inventory-actions{border-color:#34493a}
 @media(max-width:760px){.inventory-grid{grid-template-columns:1fr}.inventory-fields{grid-template-columns:1fr}.inventory-field-wide{grid-column:auto}.inventory-actions{flex-direction:column-reverse}.inventory-actions button{width:100%}.inventory-assignment{align-items:stretch;flex-direction:column}.inventory-assignment button{width:100%}}
+
+
+/* Photos des fiches maisons, compteurs et locataires */
+.record-photo-field{display:flex;flex-direction:column;gap:12px;margin:18px 0;padding:16px;border:1px solid #e2ece4;border-radius:14px;background:#fbfdfb}
+.record-photo-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.record-photo-heading>div{display:flex;flex-direction:column;gap:4px}
+.record-photo-heading strong{color:#304a38;font-size:12px;font-weight:800}
+.record-photo-heading small{color:#87948a;font-size:10px}
+.record-photo-grid,.record-photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.record-photo-item{position:relative;aspect-ratio:1;overflow:hidden;border-radius:11px;background:#edf3ee}
+.record-photo-item img,.record-photo-gallery img{width:100%;height:100%;object-fit:cover}
+.record-photo-item button{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:26px;height:26px;border:0;border-radius:50%;background:#18251ddd;color:white;font-size:19px;cursor:pointer}
+.record-photo-error{margin:0;color:#b42318;font-size:11px}
+.record-photo-gallery{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.record-photo-gallery img{aspect-ratio:4/3;border-radius:12px}
+.record-directory-photo{display:block;flex:0 0 44px;width:44px;height:44px;object-fit:cover;border-radius:12px}
+.record-profile-photo{display:block;flex:0 0 58px;width:58px;height:58px;object-fit:cover;border-radius:50%}
+.meter-photo-panel{padding:14px}
+.meter-photo-panel img{display:block;width:100%;max-width:420px;max-height:320px;object-fit:contain;border-radius:12px;margin:auto}
+:root[data-theme="dark"] .record-photo-field{border-color:#34493a;background:#1b2b22}
+:root[data-theme="dark"] .record-photo-heading strong{color:#dcebe0}
+:root[data-theme="dark"] .record-photo-heading small{color:#9bada1}
+@media(max-width:600px){.record-photo-field{padding:12px}.record-photo-heading{align-items:flex-start;flex-direction:column}.record-photo-heading button{width:100%}.record-photo-grid,.record-photo-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
