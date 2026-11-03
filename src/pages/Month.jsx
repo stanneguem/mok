@@ -160,7 +160,7 @@ export default function Month() {
 
   const readingCount=tenants.filter(t=>idx[t.id]?.saved).length
   const selectedTenant=tenants.find(t=>t.id===selectedTenantId)
-  const selectedReading=selectedTenant?idx[selectedTenant.id]||:{}
+  const selectedReading = selectedTenant ? (idx[selectedTenant.id] || {}) : {}
   const totalBilled=sum(bills,'total'),totalConsumption=sum(bills,'consumption')
   const totalPaid=bills.reduce((acc,b)=>acc+(b.payments||[]).reduce((s,p)=>s+Number(p.amount||0),0),0)
   const totalDue=totalBilled-totalPaid
