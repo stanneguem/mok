@@ -82,6 +82,12 @@ export default function App() {
   const [session,setSession]=useState(null)
   const [authChecking,setAuthChecking]=useState(true)
   const [tab,setTab]=useState('month')
+  const [theme,setTheme]=useState(()=>localStorage.getItem('mok-theme')==='dark'?'dark':'light')
+  useEffect(()=>{
+    document.documentElement.dataset.theme=theme
+    localStorage.setItem('mok-theme',theme)
+  },[theme])
+  const toggleTheme=()=>setTheme(current=>current==='dark'?'light':'dark')
   useEffect(()=>{
     let mounted=true
     supabase.auth.getSession().then(({data,error})=>{if(!mounted)return;setSession(data?.session||null);setAuthChecking(false);if(error)console.error('MOK auth session:',error.message)}).catch(error=>{if(!mounted)return;console.error('MOK auth session:',error);setAuthChecking(false)})
@@ -94,7 +100,7 @@ export default function App() {
   const active=navigation.find(item=>item.id===tab)||navigation[0]
   return <div className="app-shell">
     <header className="app-topbar"><a className="app-logo" href="#" onClick={e=>{e.preventDefault();setTab('month')}} aria-label="MOK - Accueil"><span className="app-logo-mark">M</span><span>MOK<span className="logo-dot">.</span></span></a>
-      <div className="topbar-right"><span className="account-chip"><span className="account-avatar">M</span><span>Mon espace</span></span><button className="logout-button" onClick={()=>supabase.auth.signOut()}><span aria-hidden="true">↪</span> Déconnexion</button></div>
+      <div className="topbar-right"><button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={theme==='dark'?'Activer le thème jour':'Activer le thème nuit'} title={theme==='dark'?'Passer au thème jour':'Passer au thème nuit'}><span aria-hidden="true">{theme==='dark'?'☀':'☾'}</span><span className="theme-toggle-label">{theme==='dark'?'Jour':'Nuit'}</span></button><span className="account-chip"><span className="account-avatar">M</span><span>Mon espace</span></span><button className="logout-button" onClick={()=>supabase.auth.signOut()}><span aria-hidden="true">↪</span> Déconnexion</button></div>
     </header>
     <div className="app-layout"><aside className="app-sidebar"><span className="sidebar-caption">ESPACE DE TRAVAIL</span><nav className="app-nav" aria-label="Navigation principale">{navigation.map(item=><button key={item.id} className={tab===item.id?'nav-item active':'nav-item'} onClick={()=>setTab(item.id)} aria-current={tab===item.id?'page':undefined}><span className="nav-icon" aria-hidden="true">{item.icon}</span><span>{item.label}</span>{tab===item.id&&<span className="nav-indicator"/>}</button>)}</nav><div className="sidebar-note"><span className="sidebar-note-icon">✦</span><strong>Bienvenue sur MOK</strong><p>Ton espace pour gérer tes locations et suivre les paiements simplement.</p></div></aside>
       <main className="app-content"><div className="mobile-page-context"><span>{active.icon}</span>{active.label}</div>{pages[tab]}</main>
