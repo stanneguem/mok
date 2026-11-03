@@ -6,7 +6,7 @@ import {monthReportPdf} from '../pdf'
 const fmtMonth = value => value ? value.slice(0,7) : '—'
 const sum = (items, key) => items.reduce((total, item) => total + Number(item[key] || 0), 0)
 
-export default function Month() {
+export default function Month({view='readings'}) {
   const [periods,setPeriods]=useState([])
   const [pid,setPid]=useState('')
   const [tenants,setTenants]=useState([])
@@ -168,7 +168,7 @@ export default function Month() {
   const money=(n)=>fcfa(n)
 
   return <section className="workspace-page">
-    <header className="page-heading"><div><span className="eyebrow">GESTION LOCATIVE</span><h1>Suivi mensuel</h1><p>Centralise les relevés, les factures et les dépenses d’électricité de tes locations.</p></div></header>
+    <header className="page-heading"><div><span className="eyebrow">{view === "readings" ? "SAISIE DES COMPTEURS" : "GESTION DE LA FACTURATION"}</span><h1>{view === "readings" ? "Relevés des compteurs" : "Factures et facturation"}</h1><p>{view === "readings" ? "Enregistre les index de chaque locataire pour la période sélectionnée." : "Génère les factures individuelles et enregistre la facture générale du fournisseur."}</p></div></header>
 
     <section className="panel">
       <div className="panel-heading"><div><span className="eyebrow">PÉRIODE DE TRAVAIL</span><h2>Choisir ou créer un mois</h2><p>Sélectionne la période à gérer ou prépare le mois suivant.</p></div></div>
@@ -189,6 +189,7 @@ export default function Month() {
         <article className="summary-card"><span className="summary-label">Reste à encaisser</span><strong>{money(totalDue)}</strong><span className="summary-foot">Sur {money(totalBilled)} facturés</span></article>
       </div>
 
+      {view === "readings" && (
       <section className="panel step-panel reading-section">
         <button type="button" className="reading-section-toggle" onClick={()=>setReadingsCollapsed(value=>!value)} aria-expanded={!readingsCollapsed}>
           <span className="reading-section-title"><span className="step-number">1</span><span><strong>Relevés des compteurs individuels</strong><small>Saisis les index de chaque locataire, un par un.</small></span></span>
@@ -205,7 +206,9 @@ export default function Month() {
           </div>}
         </div>}
       </section>
+      )}
 
+      {view === "invoices" && (
       <section className="panel step-panel">
         <div className="panel-heading"><div><div className="step-title"><span className="step-number">2</span><h2>Factures des locataires</h2></div><p className="step-description">Génère les montants à payer à partir des relevés et des éventuels reports.</p></div></div>
         <div className="panel-actions"><div className="inline-field"><label htmlFor="distribution-date">Date de distribution</label><input id="distribution-date" type="date" value={dist} onChange={e=>setDist(e.target.value)}/></div><button className="primary-button" disabled={busy||!allReadingsDone} onClick={generateBills}>{busy?'Traitement…':'Générer / actualiser les factures'}</button><button className="secondary-button" disabled={busy||!bills.length} onClick={bilanPdf}>↓ Télécharger le bilan PDF</button></div>
@@ -225,6 +228,7 @@ export default function Month() {
         </div>
         {period.main_amount!==null&&period.main_amount!==undefined&&<div className="metric-inline" style={{marginTop:15}}><span className="metric-pill">Facture générale : <strong>{money(period.main_amount)}</strong></span><span className="metric-pill">Résidu calculé : <strong>{money(period.residual||0)}</strong></span><span className="metric-pill">{Number(period.residual||0)<0?'Affecté au fonds d’urgence':'À répartir le mois suivant'}</span></div>}
       </section>
+      )}
     </>}
   </section>
 }

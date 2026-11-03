@@ -207,3 +207,53 @@ td,th{padding:10px 12px;border-bottom:1px solid #e1e6e2;text-align:left}
 :root[data-theme="dark"] .auth-shell{background:#152219}
 @media(max-width:760px){.theme-toggle{height:34px;padding:0 9px}.theme-toggle-label{display:none}}
 @media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}
+
+/* Dashboard overview */
+.dashboard-welcome{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px}
+.dashboard-welcome h1{margin:5px 0 7px;color:#24382b;font-size:clamp(24px,3vw,32px);font-weight:820;letter-spacing:-.045em}
+.dashboard-welcome p{margin:0;color:#839087;font-size:12px;line-height:1.6}
+.dashboard-period{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #e3ebe5;border-radius:10px;background:#fff;color:#5e7566;font-size:10px;font-weight:750;white-space:nowrap}
+.dashboard-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:20px}
+.dashboard-metric{min-width:0;padding:18px;border:1px solid #e7eee8;border-radius:14px;background:#fff;box-shadow:0 3px 14px rgba(32,67,43,.035)}
+.dashboard-metric-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:15px}
+.dashboard-metric-label{color:#829087;font-size:10px;font-weight:650}
+.dashboard-metric-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#edf6ef;color:#397b50;font-size:15px}
+.dashboard-metric strong{display:block;overflow:hidden;color:#294333;font-size:clamp(17px,2vw,24px);font-weight:850;letter-spacing:-.035em;text-overflow:ellipsis;white-space:nowrap}
+.dashboard-metric small{display:block;margin-top:7px;color:#9aa59d;font-size:9px;line-height:1.5}
+.dashboard-main-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.85fr);gap:15px;align-items:start}
+.dashboard-panel{min-width:0;padding:20px;border:1px solid #e7eee8;border-radius:14px;background:#fff}
+.dashboard-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}
+.dashboard-panel-heading h2{margin:0;color:#2c4032;font-size:14px;font-weight:800}
+.dashboard-panel-heading p{margin:5px 0 0;color:#929e95;font-size:10px}
+.dashboard-progress-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:13px 0 8px;color:#687c6e;font-size:10px}
+.dashboard-progress-row strong{color:#345b40;font-size:11px}
+.dashboard-progress{height:8px;overflow:hidden;border-radius:99px;background:#edf2ee}
+.dashboard-progress>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#55a875,#83c99a)}
+.dashboard-status-list{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.dashboard-status-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid #f0f3f0}
+.dashboard-status-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border-radius:10px;background:#f0f6f1;color:#4c805d}
+.dashboard-status-copy{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.dashboard-status-copy strong{color:#405548;font-size:10px}
+.dashboard-status-copy small{color:#96a198;font-size:9px}
+.dashboard-status-value{color:#476b53;font-size:10px;font-weight:800;white-space:nowrap}
+.dashboard-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.dashboard-shortcut{display:flex;align-items:center;gap:10px;min-width:0;padding:13px;border:1px solid #e7eee8;border-radius:11px;background:#fbfdfb;color:#47614f;text-align:left;transition:border-color .18s,background .18s,transform .18s}
+.dashboard-shortcut:hover{transform:translateY(-1px);border-color:#b9d4c1;background:#f3faf5}
+.dashboard-shortcut-icon{width:32px;height:32px;display:grid;place-items:center;flex:0 0 auto;border-radius:9px;background:#eaf4ed;color:#34764a}
+.dashboard-shortcut span:last-child{display:flex;flex-direction:column;gap:3px;min-width:0}
+.dashboard-shortcut strong{overflow:hidden;color:#385241;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.dashboard-shortcut small{color:#98a49b;font-size:8px}
+@media(max-width:900px){.dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-main-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.dashboard-welcome{align-items:flex-start;flex-direction:column;gap:12px}.dashboard-period{font-size:9px}.dashboard-metrics{gap:9px}.dashboard-metric{padding:13px;border-radius:11px}.dashboard-metric-top{margin-bottom:11px}.dashboard-metric-icon{width:27px;height:27px}.dashboard-metric strong{font-size:17px}.dashboard-panel{padding:15px}.dashboard-shortcuts{grid-template-columns:1fr 1fr}.dashboard-shortcut{gap:7px;padding:10px 8px}.dashboard-shortcut-icon{width:28px;height:28px}.dashboard-shortcut strong{font-size:9px}}
+:root[data-theme="dark"] .dashboard-welcome h1{color:#e1eee5}
+:root[data-theme="dark"] .dashboard-welcome p,:root[data-theme="dark"] .dashboard-metric-label,:root[data-theme="dark"] .dashboard-metric small,:root[data-theme="dark"] .dashboard-panel-heading p,:root[data-theme="dark"] .dashboard-status-copy small,:root[data-theme="dark"] .dashboard-shortcut small{color:#9bada1}
+:root[data-theme="dark"] .dashboard-period,:root[data-theme="dark"] .dashboard-metric,:root[data-theme="dark"] .dashboard-panel{border-color:#2d4034;background:#1b2921}
+:root[data-theme="dark"] .dashboard-metric strong,:root[data-theme="dark"] .dashboard-panel-heading h2{color:#dcebe0}
+:root[data-theme="dark"] .dashboard-metric-icon,:root[data-theme="dark"] .dashboard-status-icon,:root[data-theme="dark"] .dashboard-shortcut-icon{background:#294333;color:#a9dfb8}
+:root[data-theme="dark"] .dashboard-progress{background:#34483a}
+:root[data-theme="dark"] .dashboard-progress-row{color:#a5b6aa}
+:root[data-theme="dark"] .dashboard-progress-row strong,:root[data-theme="dark"] .dashboard-status-value{color:#b8e5c4}
+:root[data-theme="dark"] .dashboard-status-item{border-color:#2d4034}
+:root[data-theme="dark"] .dashboard-status-copy strong,:root[data-theme="dark"] .dashboard-shortcut strong{color:#d3e4d8}
+:root[data-theme="dark"] .dashboard-shortcut{border-color:#34493a;background:#1d2c23}
+:root[data-theme="dark"] .dashboard-shortcut:hover{border-color:#5a8968;background:#23382a}
