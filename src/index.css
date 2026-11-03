@@ -407,3 +407,31 @@ td,th{padding:10px 12px;border-bottom:1px solid #e1e6e2;text-align:left}
 .tenant-add-screen{display:flex;flex-direction:column;gap:18px;max-width:900px;width:100%;margin:0 auto}
 .tenant-add-screen .tenant-edit-hero .tenant-profile-avatar{background:#e7f4eb;color:#287447}
 :root[data-theme="dark"] .tenant-add-screen .tenant-edit-hero .tenant-profile-avatar{background:#294333;color:#a9dfb8}
+
+
+/* Inventaire des maisons et compteurs */
+.inventory-module{display:flex;flex-direction:column;gap:17px}
+.inventory-form{padding:20px}
+.inventory-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:15px}
+.inventory-field-wide{grid-column:1/-1}
+.inventory-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px;padding-top:16px;border-top:1px solid #e8efe9}
+.inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.inventory-card{padding:18px;min-width:0}
+.inventory-card-top{display:flex;align-items:center;justify-content:space-between}
+.inventory-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#eaf4ed;color:#34784c;font-size:20px}
+.inventory-card h2{margin:13px 0 5px;color:#2c4333;font-size:16px}
+.inventory-card>p{margin:0;color:#89968d;font-size:10px;line-height:1.6}
+.inventory-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin:14px 0;color:#7c8b80;font-size:9px}
+.inventory-assignment{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #edf1ed}
+.inventory-assignment>div{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.inventory-assignment small{color:#8b988f;font-size:8px;font-weight:800;letter-spacing:.07em}
+.inventory-assignment strong{color:#304a38;font-size:11px}
+.inventory-assignment select{flex:1;min-width:0}
+.inventory-edit-link{margin-top:12px;padding:0;border:0;background:transparent;color:#34784c;font-size:10px;font-weight:800}
+:root[data-theme="dark"] .inventory-card h2,:root[data-theme="dark"] .inventory-assignment strong{color:#dcebe0}
+:root[data-theme="dark"] .inventory-card>p,:root[data-theme="dark"] .inventory-meta{color:#9bada1}
+:root[data-theme="dark"] .inventory-icon{background:#294333;color:#a9dfb8}
+:root[data-theme="dark"] .inventory-assignment{border-color:#304337}
+:root[data-theme="dark"] .inventory-edit-link{color:#9cdbaf}
+:root[data-theme="dark"] .inventory-actions{border-color:#34493a}
+@media(max-width:760px){.inventory-grid{grid-template-columns:1fr}.inventory-fields{grid-template-columns:1fr}.inventory-field-wide{grid-column:auto}.inventory-actions{flex-direction:column-reverse}.inventory-actions button{width:100%}.inventory-assignment{align-items:stretch;flex-direction:column}.inventory-assignment button{width:100%}}
