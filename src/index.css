@@ -458,3 +458,20 @@ td,th{padding:10px 12px;border-bottom:1px solid #e1e6e2;text-align:left}
 :root[data-theme="dark"] .record-photo-heading strong{color:#dcebe0}
 :root[data-theme="dark"] .record-photo-heading small{color:#9bada1}
 @media(max-width:600px){.record-photo-field{padding:12px}.record-photo-heading{align-items:flex-start;flex-direction:column}.record-photo-heading button{width:100%}.record-photo-grid,.record-photo-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Gestion des loyers, charges et localisation des maisons */
+.house-form-section{margin:24px 0;padding:20px;border:1px solid var(--border-color,#e3eae4);border-radius:16px;background:var(--panel-soft,rgba(120,150,125,.045))}
+.house-form-section>.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.house-form-section .panel-heading h2{margin:5px 0;font-size:17px}
+.house-form-section .panel-heading p{margin:5px 0 0}
+.house-rent-field{max-width:420px;margin:12px 0 24px}
+.house-charge-heading{margin-top:22px}
+.house-charge-row{display:grid;grid-template-columns:1fr 1.2fr 1fr 1.3fr auto;align-items:end;gap:12px;padding:14px 0;border-top:1px solid var(--border-color,#e3eae4)}
+.house-charge-row .field{min-width:0}
+.house-remove-charge{width:38px;height:38px;margin-bottom:2px;border:1px solid #e5b7b7;border-radius:10px;background:transparent;color:#b42318;font-size:22px;cursor:pointer}
+.house-map-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;margin-top:8px}
+:root[data-theme="dark"] .house-form-section{border-color:#34493a;background:#1b2b22}
+:root[data-theme="dark"] .house-charge-row{border-color:#34493a}
+@media(max-width:900px){.house-charge-row{grid-template-columns:repeat(2,minmax(0,1fr))}.house-remove-charge{grid-column:2;justify-self:end}}
+@media(max-width:600px){.house-form-section{padding:14px}.house-form-section>.panel-heading{flex-direction:column}.house-form-section>.panel-heading button{width:100%}.house-charge-row{grid-template-columns:1fr}.house-remove-charge{grid-column:1;justify-self:end}}
