@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState} from 'react'
 import {supabase} from '../supabase'
-const empty={meter_number:'',meter_type:'electricity',brand:'',model:'',initial_index:'',installation_date:'',notes:''}
+import RecordPhotoField from '../components/RecordPhotoField'
+const empty={meter_number:'',meter_type:'electricity',brand:'',model:'',initial_index:'',installation_date:'',notes:'',photo_url:''}
 const dateLabel=v=>v?new Date(v+'T00:00:00').toLocaleDateString('fr-FR'):'—'
 const typeLabel=v=>({electricity:'Électricité',water:'Eau',gas:'Gaz',other:'Autre'}[v]||'Autre')
 export default function Meters(){
@@ -44,6 +45,7 @@ export default function Meters(){
   {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':'notice-success')}>{notice.text}</div>}
   <section className="tenant-edit-hero"><span className="tenant-profile-avatar">◉</span><div><span className="eyebrow">{mode==='edit'?'MODIFICATION':'NOUVEL ÉQUIPEMENT'}</span><h1>{mode==='edit'?'Modifier le compteur':'Ajouter un compteur'}</h1><p>Renseigne les caractéristiques du compteur.</p></div></section>
   <section className="panel tenant-edit-form-panel"><div className="panel-heading"><div><span className="eyebrow">INFORMATIONS DU COMPTEUR</span><h2>{form.meter_number||'Nouveau compteur'}</h2></div></div>
+   <RecordPhotoField value={form.photo_url} label="Photo du compteur" onChange={photo_url=>setForm(v=>({...v,photo_url}))}/>
    <div className="tenant-edit-fields">
     <div className="field"><label>Numéro du compteur *</label><input autoFocus value={form.meter_number} onChange={e=>setForm(v=>({...v,meter_number:e.target.value}))} placeholder="MTR-001"/></div>
     <div className="field"><label>Type</label><select value={form.meter_type} onChange={e=>setForm(v=>({...v,meter_type:e.target.value}))}><option value="electricity">Électricité</option><option value="water">Eau</option><option value="gas">Gaz</option><option value="other">Autre</option></select></div>
@@ -59,6 +61,7 @@ export default function Meters(){
   <header className="tenant-detail-toolbar"><button className="tenant-back-button" onClick={back}>← <span>Liste des compteurs</span></button><span className="tenant-detail-breadcrumb">Fiche compteur</span></header>
   {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':'notice-success')}>{notice.text}</div>}
   <section className="tenant-profile-card"><div className="tenant-profile-identity"><span className="tenant-profile-avatar">◉</span><div><span className="eyebrow">FICHE COMPTEUR</span><h1>{selected.meter_number}</h1><p>{typeLabel(selected.meter_type)} · {[selected.brand,selected.model].filter(Boolean).join(' ')||'Marque non renseignée'}</p></div></div><div className="tenant-profile-actions"><span className={'tenant-directory-status '+(activeAssignment?'active':'inactive')}>{activeAssignment?'Installé':'Disponible'}</span><button className="secondary-button" onClick={beginEdit}>Modifier le compteur</button></div></section>
+  {selected.photo_url&&<section className="panel meter-photo-panel"><img src={selected.photo_url} alt={'Compteur '+selected.meter_number}/></section>}
   <div className="tenant-profile-metrics"><article className="tenant-profile-metric"><span>Maison actuelle</span><strong>{activeAssignment?.houses?.name||'Aucune'}</strong></article><article className="tenant-profile-metric"><span>Index initial</span><strong>{selected.initial_index??'—'}</strong></article><article className="tenant-profile-metric"><span>Date d’installation</span><strong>{dateLabel(selected.installation_date)}</strong></article><article className="tenant-profile-metric"><span>Affectations historiques</span><strong>{history.length}</strong></article></div>
   <div className="tenant-detail-grid">
    <section className="panel"><div className="panel-heading"><div><span className="eyebrow">INSTALLATION</span><h2>Maison affectée</h2></div></div>
@@ -71,7 +74,7 @@ export default function Meters(){
   <header className="page-heading tenant-page-heading"><div><span className="eyebrow">PARC MATÉRIEL</span><h1>Compteurs</h1><p>Consulte les compteurs enregistrés et leur maison d’installation.</p></div><button className="primary-button" onClick={beginAdd}>＋ Ajouter un compteur</button></header>
   {notice.text&&<div className={'notice '+(notice.type==='error'?'notice-error':'notice-success')}>{notice.text}</div>}
   <div className="tenant-list-toolbar"><div className="tenant-search"><span>⌕</span><input placeholder="Rechercher un compteur…" value={query} onChange={e=>setQuery(e.target.value)}/></div><span className="tenant-list-count">{filtered.length} / {rows.length} compteur{rows.length>1?'s':''}</span></div>
-  <section className="tenant-directory">{loading?<div className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement des compteurs…</div></div>:filtered.length===0?<div className="panel empty-state"><span className="empty-icon">◉</span><h3>{query?'Aucun résultat':'Aucun compteur enregistré'}</h3><p>Ajoute un compteur pour commencer.</p></div>:filtered.map(m=>{const a=current(m);return <button type="button" className="tenant-directory-card" key={m.id} onClick={()=>{setSelected(m);setMode('detail');setNotice({text:'',type:'info'})}}><span className="tenant-directory-avatar">◉</span><span className="tenant-directory-main"><strong>{m.meter_number}</strong><small>{typeLabel(m.meter_type)} <i>·</i> {a?.houses?.name||'Disponible'}</small></span><span className={'tenant-directory-status '+(a?'active':'inactive')}>{a?'Installé':'Disponible'}</span><span className="tenant-directory-chevron">›</span></button>})}</section>
+  <section className="tenant-directory">{loading?<div className="panel"><div className="loading-inline"><span className="loading-spinner"/>Chargement des compteurs…</div></div>:filtered.length===0?<div className="panel empty-state"><span className="empty-icon">◉</span><h3>{query?'Aucun résultat':'Aucun compteur enregistré'}</h3><p>Ajoute un compteur pour commencer.</p></div>:filtered.map(m=>{const a=current(m);return <button type="button" className="tenant-directory-card" key={m.id} onClick={()=>{setSelected(m);setMode('detail');setNotice({text:'',type:'info'})}}>{m.photo_url?<img className="tenant-directory-avatar record-directory-photo" src={m.photo_url} alt=""/>:<span className="tenant-directory-avatar">◉</span>}<span className="tenant-directory-main"><strong>{m.meter_number}</strong><small>{typeLabel(m.meter_type)} <i>·</i> {a?.houses?.name||'Disponible'}</small></span><span className={'tenant-directory-status '+(a?'active':'inactive')}>{a?'Installé':'Disponible'}</span><span className="tenant-directory-chevron">›</span></button>})}</section>
  </>}
  </section>
 }
